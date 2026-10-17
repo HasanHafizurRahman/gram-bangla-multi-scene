@@ -2695,16 +2695,16 @@
     { x: 985,  y: 498, h: 195, lean: 4,   type: "betel",   phase: 1.7, fronds: 9 },
     { x: 595,  y: 565, h: 185, lean: -8,  type: "betel",   phase: 2.6, fronds: 9 },
 
-    // Railway line embankment palms — East / River side corridor
-    { x: 1180, y: 1080, h: 235, lean: 16, type: "coconut", phase: 1.1, fronds: 12 },
-    { x: 1300, y: 800,  h: 210, lean: 20, type: "betel",   phase: 2.7, fronds: 9 },
-    { x: 1495, y: 545,  h: 185, lean: 18, type: "coconut", phase: 4.3, fronds: 11 },
-    { x: 1780, y: 330,  h: 155, lean: 14, type: "betel",   phase: 0.7, fronds: 9 },
+    // Railway line embankment palms — East / River side corridor (spaced cleanly beside the line)
+    { x: 1260, y: 1080, h: 235, lean: 16, type: "coconut", phase: 1.1, fronds: 12 },
+    { x: 1420, y: 800,  h: 210, lean: 20, type: "betel",   phase: 2.7, fronds: 9 },
+    { x: 1650, y: 545,  h: 185, lean: 18, type: "coconut", phase: 4.3, fronds: 11 },
+    { x: 1960, y: 300,  h: 155, lean: 14, type: "betel",   phase: 0.7, fronds: 9 },
 
-    // Railway line embankment palms — West / Village & Paddy side corridor
-    { x: 1010, y: 1030, h: 225, lean: -13, type: "betel",   phase: 1.4, fronds: 9 },
-    { x: 1190, y: 730,  h: 205, lean: -16, type: "coconut", phase: 3.0, fronds: 11 },
-    { x: 1445, y: 480,  h: 175, lean: -10, type: "betel",   phase: 4.6, fronds: 9 }
+    // Railway line embankment palms — West / Village & Paddy side corridor (spaced cleanly beside the line)
+    { x: 940,  y: 1030, h: 225, lean: -13, type: "betel",   phase: 1.4, fronds: 9 },
+    { x: 1140, y: 730,  h: 205, lean: -16, type: "coconut", phase: 3.0, fronds: 11 },
+    { x: 1370, y: 480,  h: 175, lean: -10, type: "betel",   phase: 4.6, fronds: 9 }
   ];
 
   const AERIAL_BANANAS = [
@@ -3503,12 +3503,12 @@
       { x: 1395, y: 360, trunkW: 12, trunkH: 72, sprite: jackfruitCanopySprite,  phase: 4.1, type: "jackfruit" },
       { x: 245,  y: 535, trunkW: 15, trunkH: 88, sprite: banyanCanopyA,          phase: 0.8, type: "banyan" },
 
-      // Railway line embankment shade trees
-      { x: 1165, y: 1010, trunkW: 15, trunkH: 84, sprite: mangoCanopySprite,         phase: 0.5, type: "mango" },
-      { x: 1250, y: 860,  trunkW: 16, trunkH: 88, sprite: krishnachuraCanopySprite, phase: 1.4, type: "krishnachura" },
-      { x: 1345, y: 720,  trunkW: 14, trunkH: 80, sprite: jackfruitCanopySprite,    phase: 2.3, type: "jackfruit" },
-      { x: 1455, y: 590,  trunkW: 13, trunkH: 74, sprite: mangoCanopySprite,         phase: 3.2, type: "mango" },
-      { x: 1580, y: 465,  trunkW: 12, trunkH: 68, sprite: banyanCanopyB,             phase: 4.1, type: "banyan" }
+      // Railway line embankment shade trees (placed gracefully along the meadow beside the railway line with clear setback)
+      { x: 1360, y: 1010, trunkW: 15, trunkH: 84, sprite: mangoCanopySprite,         phase: 0.5, type: "mango" },
+      { x: 1460, y: 870,  trunkW: 16, trunkH: 88, sprite: krishnachuraCanopySprite, phase: 1.4, type: "krishnachura" },
+      { x: 1580, y: 700,  trunkW: 14, trunkH: 80, sprite: jackfruitCanopySprite,    phase: 2.3, type: "jackfruit" },
+      { x: 1735, y: 560,  trunkW: 13, trunkH: 74, sprite: mangoCanopySprite,         phase: 3.2, type: "mango" },
+      { x: 1915, y: 420,  trunkW: 12, trunkH: 68, sprite: banyanCanopyB,             phase: 4.1, type: "banyan" }
     ];
 
     for (const bt of bgTrees) {
@@ -5160,12 +5160,8 @@
     drawDetailedBananaFrond(740, -25, 480, 0.85, false);
     drawDetailedBananaFrond(960, -35, 460, 0.62, false);
 
-    // Roadside Betel Palms & Arched Bamboo Grove on Right Foreground/Midground (framing the railway line)
+    // Dipping Krishnachura blossom bough framing the upper right corner of the sky (above the tracks)
     const rightRoadsideSway = baseSway * 1.35;
-    drawGroundBetelPalm(ctx, 1530, 545, 275, -12, 1.05, rightRoadsideSway * 22);
-    drawGroundBambooClump(ctx, 1445, 552, 10, 30, 185, -18, rightRoadsideSway * 32);
-
-    // Dipping Krishnachura blossom bough framing the upper right corner
     ctx.save();
     ctx.translate(1620, -10);
     ctx.rotate(0.32 + rightRoadsideSway * 0.4);
