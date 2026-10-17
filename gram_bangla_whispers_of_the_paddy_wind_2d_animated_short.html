@@ -1146,6 +1146,69 @@
           this.showAudioTag(isCalf ? "বাছুর · Calf Bleat" : "দেশি গরু · Cow Moo");
         }
 
+        playDogBark(doubleBark = true, panVal = -0.25) {
+          if (!this.initialized || this.ctx.state !== "running") return;
+          const now = this.ctx.currentTime;
+          const panner = this.ctx.createStereoPanner();
+          panner.pan.setValueAtTime(clamp(panVal, -0.9, 0.9), now);
+          panner.connect(this.compressor);
+
+          const barks = doubleBark ? [0, 0.16] : [0];
+          barks.forEach((offset, idx) => {
+            const t0 = now + offset;
+            const dur = 0.13;
+            const baseFreq = idx === 0 ? 330 : 365;
+
+            // 1. Tonal canine vocal cords
+            const osc = this.ctx.createOscillator();
+            const f1 = this.ctx.createBiquadFilter();
+            const g = this.ctx.createGain();
+
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(baseFreq, t0);
+            osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.15, t0 + 0.025);
+            osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.58, t0 + dur);
+
+            f1.type = "bandpass";
+            f1.frequency.setValueAtTime(780, t0);
+            f1.frequency.exponentialRampToValueAtTime(520, t0 + dur);
+            f1.Q.setValueAtTime(2.8, t0);
+
+            g.gain.setValueAtTime(0.0001, t0);
+            g.gain.linearRampToValueAtTime(0.16, t0 + 0.018);
+            g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+            osc.connect(f1);
+            f1.connect(g);
+            g.connect(panner);
+
+            // 2. Husky throat breath
+            const noise = this.ctx.createBufferSource();
+            noise.buffer = this.whiteBuffer;
+            const nf = this.ctx.createBiquadFilter();
+            const ng = this.ctx.createGain();
+
+            nf.type = "bandpass";
+            nf.frequency.setValueAtTime(1100, t0);
+            nf.Q.setValueAtTime(2.0, t0);
+
+            ng.gain.setValueAtTime(0.0001, t0);
+            ng.gain.linearRampToValueAtTime(0.075, t0 + 0.01);
+            ng.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.7);
+
+            noise.connect(nf);
+            nf.connect(ng);
+            ng.connect(panner);
+
+            osc.start(t0);
+            noise.start(t0);
+            osc.stop(t0 + dur + 0.02);
+            noise.stop(t0 + dur + 0.02);
+          });
+
+          this.showAudioTag("দেশি কুকুর · Dog Bark");
+        }
+
         playGoatBleat(panVal = -0.3) {
           if (!this.initialized || this.ctx.state !== "running") return;
           const now = this.ctx.currentTime;
@@ -1673,13 +1736,19 @@
       const TIMELINE_AUDIO_CUES = [
         { id: "s1_koel", t: 2.2, action: (s) => s.playBird("koel", -0.35, 0.13) },
         { id: "s1_horn", t: 5.8, action: (s) => s.playTrainHorn(true, 0.15, 0.055, 0.98) },
+        { id: "s1_cow_moo1", t: 8.5, action: (s) => s.playCowMoo(false, -0.42) },
         { id: "s1_doel", t: 11.5, action: (s) => s.playBird("doel", 0.3, 0.12) },
+        { id: "s1_dog_bark1", t: 13.5, action: (s) => s.playDogBark(true, -0.22) },
         { id: "s1_horn2", t: 15.2, action: (s) => s.playTrainHorn(false, -0.05, 0.05, 0.96) },
+        { id: "s1_cow_moo2", t: 17.5, action: (s) => s.playCowMoo(false, -0.25) },
         { id: "s1_crow", t: 18.0, action: (s) => s.playBird("crow", -0.4, 0.10) },
+        { id: "s1_dog_bark2", t: 19.5, action: (s) => s.playDogBark(false, -0.35) },
         { id: "s2_oar1", t: 26.2, action: (s) => s.playOarCreak(-0.1) },
+        { id: "s2_cow_moo3", t: 29.0, action: (s) => s.playCowMoo(false, -0.45) },
         { id: "s2_splash1", t: 30.5, action: (s) => s.playNetSplash(0.15) },
         { id: "s2_oar2", t: 33.0, action: (s) => s.playOarCreak(0.25) },
         { id: "s2_king", t: 35.2, action: (s) => s.playBird("sparrow", 0.35, 0.14) },
+        { id: "s2_calf_bleat", t: 35.8, action: (s) => s.playCowMoo(true, -0.38) },
         { id: "s2_splash2", t: 38.0, action: (s) => s.playNetSplash(0.35) },
         { id: "s2_oar3", t: 41.5, action: (s) => s.playOarCreak(0.1) },
         { id: "s3_horn_far", t: 46.8, action: (s) => s.playTrainHorn(false, -0.55, 0.08, 0.99) },
@@ -1687,13 +1756,19 @@
         { id: "s3_cow_alrt", t: 49.2, action: (s) => s.playCowMoo(false, -0.55) },
         { id: "s3_kids_wv", t: 50.8, action: (s) => s.playKidsLaughter(-0.45) },
         { id: "s3_horn_mid", t: 51.8, action: (s) => s.playTrainHorn(true, -0.1, 0.10, 0.98) },
+        { id: "s3_dog_train", t: 53.2, action: (s) => s.playDogBark(true, -0.25) },
         { id: "s3_horn_sh", t: 55.5, action: (s) => s.playTrainHorn(true, 0.0, 0.11, 0.98) },
         { id: "s3_air_hiss", t: 57.2, action: (s) => s.playAirBrakeHiss(0.15, 0.09) },
+        { id: "s3_dog_train2", t: 60.5, action: (s) => s.playDogBark(false, -0.15) },
         { id: "s3_horn_dop", t: 61.5, action: (s) => s.playTrainHorn(true, 0.05, 0.11, 0.97) },
+        { id: "s3_cow_pass", t: 62.2, action: (s) => s.playCowMoo(false, -0.35) },
         { id: "s3_horn_end", t: 68.5, action: (s) => s.playTrainHorn(false, 0.25, 0.10, 0.94) },
+        { id: "s3_cow_clear", t: 74.5, action: (s) => s.playCowMoo(false, -0.42) },
         { id: "s4_horn_eve", t: 81.2, action: (s) => s.playTrainHorn(true, 0.35, 0.05, 0.96) },
         { id: "s4_koel", t: 83.5, action: (s) => s.playBird("koel", 0.25, 0.11) },
+        { id: "s4_cow_dusk", t: 84.0, action: (s) => s.playCowMoo(false, -0.3) },
         { id: "s4_cow_eve", t: 87.0, action: (s) => s.playCowMoo(false, -0.4) },
+        { id: "s4_dog_dusk", t: 89.5, action: (s) => s.playDogBark(true, -0.3) },
         { id: "s4_doel_eve", t: 92.0, action: (s) => s.playBird("doel", -0.15, 0.10) }
       ];
 
@@ -2794,10 +2869,43 @@
       ];
 
       const CATTLE = [
-        { x: 355, y: 985, scale: 1.35, topCol: "#c87b4b", midCol: "#a85a2e", botCol: "#7d3d1a", isCalf: false, dir: 1, mooTimes: [29.0, 74.5, 112.0], phase: 0.4 },
-        { x: 670, y: 1080, scale: 1.42, topCol: "#e6caa4", midCol: "#cfa87a", botCol: "#9e794e", isCalf: false, dir: -1, mooTimes: [48.2], phase: 1.9 },
-        { x: 435, y: 1175, scale: 0.96, topCol: "#3a3f45", midCol: "#24282c", botCol: "#141619", isCalf: true, dir: -1, mooTimes: [35.0], phase: 2.8 },
-        { x: 620, y: 1165, scale: 0.94, topCol: "#34383d", midCol: "#1e2022", botCol: "#111315", isCalf: true, dir: 1, mooTimes: [], phase: 4.1 }
+        { x: 530, y: 840, scale: 1.35, topCol: "#c87b4b", midCol: "#a85a2e", botCol: "#7d3d1a", isCalf: false, dir: 1, mooTimes: [8.5, 29.0, 74.5], phase: 0.4 },
+        { x: 740, y: 845, scale: 1.40, topCol: "#e6caa4", midCol: "#cfa87a", botCol: "#9e794e", isCalf: false, dir: -1, mooTimes: [17.5, 48.2], phase: 1.9 },
+        { x: 590, y: 865, scale: 0.96, topCol: "#3a3f45", midCol: "#24282c", botCol: "#141619", isCalf: true, dir: 1, mooTimes: [35.0], phase: 2.8 },
+        { x: 790, y: 875, scale: 0.94, topCol: "#34383d", midCol: "#1e2022", botCol: "#111315", isCalf: true, dir: -1, mooTimes: [], phase: 4.1 },
+        { x: 480, y: 885, scale: 1.36, topCol: "#b84f28", midCol: "#923414", botCol: "#631d08", isCalf: false, dir: -1, mooTimes: [8.5, 62.2], phase: 1.2 },
+        { x: 670, y: 890, scale: 1.32, topCol: "#d5dbe0", midCol: "#aab2b8", botCol: "#78828a", isCalf: false, dir: 1, mooTimes: [17.5, 84.0, 87.0], phase: 3.5 }
+      ];
+
+      const VILLAGE_DOGS = [
+        {
+          id: 0,
+          baseX: 685,
+          baseY: 815,
+          scale: 0.95,
+          dir: 1,
+          colorTop: "#d48b3b",
+          colorMid: "#b56c23",
+          colorBelly: "#f5e6cc",
+          colorCollar: "#c0392b",
+          barkTimes: [13.5, 53.2, 89.5],
+          isSitting: false,
+          phase: 0.0
+        },
+        {
+          id: 1,
+          baseX: 470,
+          baseY: 690,
+          scale: 0.88,
+          dir: -1,
+          colorTop: "#4a3b32",
+          colorMid: "#33261f",
+          colorBelly: "#9c7c58",
+          colorCollar: "#27ae60",
+          barkTimes: [19.5, 60.5],
+          isSitting: true,
+          phase: 1.8
+        }
       ];
 
       const RIVER_BOATS = [
@@ -3531,6 +3639,281 @@
         ctx.restore();
       }
 
+      function drawVillageDog(ctx, dog, t) {
+        ctx.save();
+        const isBarking = dog.barkTimes.some(bt => t >= bt && t <= bt + 0.55);
+        let posX = dog.baseX;
+        let posY = dog.baseY;
+        let dir = dog.dir;
+        let trotCycle = 0;
+
+        if (!dog.isSitting) {
+          // Playful trotting around courtyard / meadow
+          const trotOffset = Math.sin(t * 1.5 + dog.phase) * 35;
+          const trotOffsetZ = Math.cos(t * 1.2 + dog.phase) * 12;
+          posX += trotOffset;
+          posY += trotOffsetZ;
+          dir = Math.cos(t * 1.5 + dog.phase) >= 0 ? 1 : -1;
+          trotCycle = t * 9.0;
+        }
+
+        ctx.translate(posX, posY);
+        ctx.scale(dog.scale * dir, dog.scale);
+
+        // Soft ground shadow
+        ctx.fillStyle = "rgba(15, 12, 8, 0.26)";
+        ctx.beginPath();
+        ctx.ellipse(0, 1, 16, 4.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const barkJolt = isBarking ? Math.sin(t * 30) * 1.5 : 0;
+        const tailWag = Math.sin(t * (isBarking ? 14 : 6) + dog.phase) * (isBarking ? 6 : 4);
+
+        if (dog.isSitting) {
+          // --- SITTING DESHI DOG ---
+          // Rear haunch on ground
+          ctx.fillStyle = dog.colorMid;
+          ctx.beginPath();
+          ctx.ellipse(-7, -5, 7, 5.5, 0.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Hind paw
+          ctx.fillStyle = dog.colorTop;
+          ctx.beginPath();
+          ctx.ellipse(-4, -1, 4, 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Torso angled up
+          ctx.save();
+          ctx.rotate(-0.35 + barkJolt * 0.05);
+          ctx.fillStyle = dog.colorTop;
+          ctx.beginPath();
+          ctx.roundRect(-8, -19, 13, 16, 5);
+          ctx.fill();
+          // Lighter chest / belly
+          ctx.fillStyle = dog.colorBelly;
+          ctx.beginPath();
+          ctx.ellipse(3, -11, 3.5, 7, 0.1, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+
+          // Front legs straight down
+          [-1, 3].forEach((fx, idx) => {
+            ctx.strokeStyle = idx === 0 ? dog.colorMid : dog.colorTop;
+            ctx.lineWidth = 2.4;
+            ctx.beginPath();
+            ctx.moveTo(fx, -12);
+            ctx.lineTo(fx + 1, 0);
+            ctx.stroke();
+            // front paw
+            ctx.fillStyle = dog.colorTop;
+            ctx.fillRect(fx - 0.5, -1, 3, 2);
+          });
+
+          // Sickle tail curled up on ground/back
+          ctx.strokeStyle = dog.colorTop;
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          ctx.moveTo(-11, -6);
+          ctx.quadraticCurveTo(-18 + tailWag, -14, -10 + tailWag * 0.5, -19);
+          ctx.stroke();
+
+          // Neck and Head
+          const headX = 5 + (isBarking ? 1 : 0);
+          const headY = -21 + (isBarking ? -3 : 0) + barkJolt;
+
+          // Collar (if any)
+          if (dog.colorCollar) {
+            ctx.strokeStyle = dog.colorCollar;
+            ctx.lineWidth = 2.0;
+            ctx.beginPath();
+            ctx.moveTo(headX - 4, headY + 5);
+            ctx.lineTo(headX + 3, headY + 5);
+            ctx.stroke();
+          }
+
+          // Head shape
+          ctx.fillStyle = dog.colorTop;
+          ctx.beginPath();
+          ctx.ellipse(headX, headY, 5.5, 4.5, isBarking ? -0.2 : 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Muzzle / Snout
+          const mouthOpen = isBarking ? 3.5 : 0;
+          ctx.fillStyle = dog.colorMid;
+          ctx.beginPath();
+          ctx.moveTo(headX + 2, headY - 1);
+          ctx.lineTo(headX + 9, headY);
+          ctx.lineTo(headX + 8, headY + 2.5 + mouthOpen);
+          ctx.lineTo(headX + 2, headY + 3.5);
+          ctx.closePath();
+          ctx.fill();
+
+          if (isBarking) {
+            ctx.fillStyle = "#8a1c14";
+            ctx.fillRect(headX + 4, headY + 1.5, 3.5, 2.2);
+          }
+
+          // Black nose
+          ctx.fillStyle = "#1a1614";
+          ctx.beginPath();
+          ctx.arc(headX + 9, headY + 0.3, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Eye
+          ctx.fillStyle = "#110e0c";
+          ctx.beginPath();
+          ctx.arc(headX + 2.2, headY - 1.5, 1.1, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Prick / alert ear
+          ctx.fillStyle = dog.colorMid;
+          ctx.beginPath();
+          ctx.moveTo(headX - 3, headY - 2);
+          ctx.lineTo(headX - 6, headY - 9);
+          ctx.lineTo(headX, headY - 4);
+          ctx.closePath();
+          ctx.fill();
+
+          // Bark sound ripple rings
+          if (isBarking) {
+            const ringP = (t * 4.0) % 1;
+            ctx.strokeStyle = `rgba(255, 235, 175, ${(1 - ringP) * 0.85})`;
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.arc(headX + 11, headY + 1, 4 + ringP * 14, -0.6, 0.6);
+            ctx.stroke();
+          }
+        } else {
+          // --- TROTTING DESHI DOG ---
+          const legPhase1 = Math.sin(trotCycle);
+          const legPhase2 = Math.sin(trotCycle + Math.PI);
+          const bodyBob = Math.abs(Math.sin(trotCycle)) * 1.5 + barkJolt;
+
+          // Back legs
+          ctx.strokeStyle = dog.colorMid;
+          ctx.lineWidth = 2.2;
+          // Far back leg
+          ctx.beginPath();
+          ctx.moveTo(-9, -10 - bodyBob);
+          ctx.lineTo(-9 - legPhase2 * 4, 0);
+          ctx.stroke();
+          // Far front leg
+          ctx.beginPath();
+          ctx.moveTo(7, -10 - bodyBob);
+          ctx.lineTo(7 + legPhase1 * 4, 0);
+          ctx.stroke();
+
+          // Body torso
+          ctx.fillStyle = dog.colorTop;
+          ctx.beginPath();
+          ctx.roundRect(-12, -15 - bodyBob, 20, 9, 4);
+          ctx.fill();
+
+          // Lighter underside
+          ctx.fillStyle = dog.colorBelly;
+          ctx.beginPath();
+          ctx.ellipse(-1, -9 - bodyBob, 7, 2.5, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Near back leg
+          ctx.strokeStyle = dog.colorTop;
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          ctx.moveTo(-7, -10 - bodyBob);
+          ctx.lineTo(-7 + legPhase1 * 4.5, 0);
+          ctx.stroke();
+          ctx.fillStyle = dog.colorMid;
+          ctx.fillRect(-8 + legPhase1 * 4.5, -1, 3, 2);
+
+          // Near front leg
+          ctx.strokeStyle = dog.colorTop;
+          ctx.lineWidth = 2.4;
+          ctx.beginPath();
+          ctx.moveTo(9, -10 - bodyBob);
+          ctx.lineTo(9 - legPhase2 * 4.5, 0);
+          ctx.stroke();
+          ctx.fillStyle = dog.colorMid;
+          ctx.fillRect(8 - legPhase2 * 4.5, -1, 3, 2);
+
+          // Characteristic Deshi sickle tail curved up over rump
+          ctx.strokeStyle = dog.colorTop;
+          ctx.lineWidth = 2.3;
+          ctx.beginPath();
+          ctx.moveTo(-12, -13 - bodyBob);
+          ctx.quadraticCurveTo(-18 + tailWag, -22 - bodyBob, -10 + tailWag * 0.7, -23 - bodyBob);
+          ctx.stroke();
+
+          // Neck and Head
+          const headX = 9;
+          const headY = -18 - bodyBob + (isBarking ? -2 : 0);
+
+          if (dog.colorCollar) {
+            ctx.strokeStyle = dog.colorCollar;
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(headX - 3, headY + 4);
+            ctx.lineTo(headX + 2, headY + 4);
+            ctx.stroke();
+          }
+
+          // Head
+          ctx.fillStyle = dog.colorTop;
+          ctx.beginPath();
+          ctx.ellipse(headX, headY, 5.2, 4.2, isBarking ? -0.25 : 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Snout
+          const mouthOpen = isBarking ? 3.5 : 0;
+          ctx.fillStyle = dog.colorMid;
+          ctx.beginPath();
+          ctx.moveTo(headX + 2, headY - 1);
+          ctx.lineTo(headX + 8, headY);
+          ctx.lineTo(headX + 7, headY + 2 + mouthOpen);
+          ctx.lineTo(headX + 2, headY + 3);
+          ctx.closePath();
+          ctx.fill();
+
+          if (isBarking) {
+            ctx.fillStyle = "#8a1c14";
+            ctx.fillRect(headX + 4, headY + 1.2, 3.2, 2.0);
+          }
+
+          // Black nose
+          ctx.fillStyle = "#1a1614";
+          ctx.beginPath();
+          ctx.arc(headX + 8, headY + 0.3, 1.1, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Eye
+          ctx.fillStyle = "#110e0c";
+          ctx.beginPath();
+          ctx.arc(headX + 2, headY - 1.2, 1.0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Prick ear
+          ctx.fillStyle = dog.colorMid;
+          ctx.beginPath();
+          ctx.moveTo(headX - 2.5, headY - 2.5);
+          ctx.lineTo(headX - 5.5, headY - 9.5);
+          ctx.lineTo(headX, headY - 4);
+          ctx.closePath();
+          ctx.fill();
+
+          // Bark sound ripple rings
+          if (isBarking) {
+            const ringP = (t * 4.0) % 1;
+            ctx.strokeStyle = `rgba(255, 235, 175, ${(1 - ringP) * 0.85})`;
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.arc(headX + 10, headY + 1, 4 + ringP * 14, -0.6, 0.6);
+            ctx.stroke();
+          }
+        }
+
+        ctx.restore();
+      }
+
       function drawVillageLife(ctx, t, atm) {
         const { wind } = atm;
         const breathe = Math.sin(t * 2.6);
@@ -3851,6 +4234,10 @@
             ctx.stroke();
           }
           ctx.restore();
+        });
+
+        VILLAGE_DOGS.forEach((dog) => {
+          drawVillageDog(ctx, dog, t);
         });
 
         ctx.save();
@@ -4792,6 +5179,7 @@
 
         drawGroundBackgroundActivity(ctx, t, atm);
         drawGroundPerspectiveTrain(ctx, t, gust);
+        drawGroundEmbankmentLife(ctx, t, atm);
         drawGroundForegroundBananaFoliage(ctx, t, gust);
 
         ctx.restore();
@@ -4799,25 +5187,7 @@
 
       function drawGroundBackgroundActivity(ctx, t, atm) {
         ctx.save();
-        // Fixed ground observer camera: natural landscape is stationary
-        // Alert Deshi Zebu Cow & Waving Village Children by the embankment
-        const headLift = smoothstep(46.5, 49.5, t) * 7;
-        ctx.fillStyle = "#a85a2e";
-        ctx.beginPath();
-        ctx.roundRect(540, 470, 26, 13, 4);
-        ctx.fill();
-        ctx.fillRect(562, 464 - headLift, 9, 9);
-
-        const roles = ["childBoy", "childGirl", "boy"];
-        roles.forEach((role, i) => {
-          drawPerson(ctx, {
-            x: 610 + i * 22, y: 492, scale: 0.52, dir: 1,
-            walkPhase: t * 8 + i, isWalking: false, breathe: Math.sin(t * 3),
-            wind: atm.wind, role, armReach: -2.1 + Math.sin(t * 14 + i) * 0.45, timeSec: t
-          });
-        });
-
-        // Startled flock of birds rising when the first two-tone horn blasts at 46.8s
+        // Startled flock of birds rising from behind trees when the two-tone horn blasts at 46.8s
         if (t >= 46.8 && t <= 59.0) {
           const bt = t - 46.8;
           for (let b = 0; b < 14; b++) {
@@ -4833,6 +5203,364 @@
             ctx.stroke();
           }
         }
+        ctx.restore();
+      }
+
+      function drawGroundEmbankmentLife(ctx, t, atm) {
+        ctx.save();
+        // ============================================================================
+        // VIBRANT GROUND PERSPECTIVE EMBANKMENT LIFE (COWS, CHILDREN & BARKING DOG)
+        // Scaled to match the 4.5x ground perspective locomotive and foreground framing
+        // ============================================================================
+
+        // 0. Lush Green Meadow Verge & Wildflowers on Embankment Slope
+        ctx.save();
+        const grassTufts = [
+          { x: 440, y: 735, w: 220, h: 22 },
+          { x: 650, y: 742, w: 280, h: 26 },
+          { x: 990, y: 745, w: 230, h: 24 }
+        ];
+        grassTufts.forEach(gt => {
+          const gGrad = ctx.createRadialGradient(gt.x + gt.w * 0.5, gt.y, 10, gt.x + gt.w * 0.5, gt.y, gt.w * 0.55);
+          gGrad.addColorStop(0, "rgba(92, 140, 48, 0.72)");
+          gGrad.addColorStop(0.65, "rgba(65, 105, 32, 0.45)");
+          gGrad.addColorStop(1, "rgba(50, 80, 24, 0)");
+          ctx.fillStyle = gGrad;
+          ctx.beginPath();
+          ctx.ellipse(gt.x + gt.w * 0.5, gt.y + 4, gt.w * 0.5, gt.h * 0.8, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Blades of green dhoob grass
+          for (let b = 0; b < 16; b++) {
+            const bx = gt.x + 12 + b * (gt.w - 24) / 15;
+            const by = gt.y + (b % 3) * 3;
+            const bh = 14 + (b % 4) * 6;
+            const bSway = Math.sin(t * 2.5 + b) * 3;
+            ctx.strokeStyle = b % 2 === 0 ? "#68a832" : "#86c842";
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.moveTo(bx, by);
+            ctx.quadraticCurveTo(bx + bSway * 0.5, by - bh * 0.6, bx + bSway, by - bh);
+            ctx.stroke();
+
+            // Tiny yellow mustard wildflowers
+            if (b % 5 === 1) {
+              ctx.fillStyle = "#facc15";
+              ctx.beginPath();
+              ctx.arc(bx + bSway, by - bh - 2, 2.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        });
+        ctx.restore();
+
+        // 1. Cow 1: Alert Red Chittagong Mother Cow (Lush Red-Brown Zebu)
+        const headLift1 = smoothstep(46.5, 49.5, t) * 8;
+        const tailSwish1 = Math.sin(t * 4.2) * 5;
+        const isMooing1 = (t >= 49.0 && t <= 50.8) || (t >= 62.0 && t <= 63.8);
+        const graze1 = isMooing1 ? -6 : (headLift1 > 3 ? -headLift1 * 0.9 : (Math.sin(t * 1.5) > 0.1 ? 4 : 0));
+
+        ctx.save();
+        ctx.translate(520, 720);
+        ctx.scale(3.1, 3.1);
+
+        // Ground shadow
+        ctx.fillStyle = "rgba(18, 12, 6, 0.38)";
+        ctx.beginPath();
+        ctx.ellipse(0, 1.5, 24, 5.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 4 sturdy legs with dark hooves
+        [-14, -8, 9, 15].forEach((lx, idx) => {
+          ctx.strokeStyle = idx % 2 === 0 ? "#782d12" : "#a84518";
+          ctx.lineWidth = 3.2;
+          ctx.beginPath();
+          ctx.moveTo(lx, -13);
+          ctx.lineTo(lx, 0);
+          ctx.stroke();
+          ctx.fillStyle = "#261a12";
+          ctx.fillRect(lx - 1.8, -1.5, 3.6, 2.8);
+        });
+
+        // Body with muscular Zebu hump
+        const cowGrad1 = ctx.createLinearGradient(0, -28, 0, -8);
+        cowGrad1.addColorStop(0, "#d9652d");
+        cowGrad1.addColorStop(0.55, "#b34617");
+        cowGrad1.addColorStop(1, "#7a2b0e");
+        ctx.fillStyle = cowGrad1;
+        ctx.beginPath();
+        ctx.moveTo(-19, -12);
+        ctx.quadraticCurveTo(-22, -24, -12, -25);
+        ctx.lineTo(4, -25);
+        ctx.quadraticCurveTo(10, -32, 16, -24); // majestic zebu hump
+        ctx.lineTo(19, -12);
+        ctx.quadraticCurveTo(0, -9, -19, -12);
+        ctx.fill();
+
+        // Tail
+        ctx.strokeStyle = "#7a2b0e";
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(-19, -22);
+        ctx.quadraticCurveTo(-25 + tailSwish1, -13, -22 + tailSwish1, -6);
+        ctx.stroke();
+        ctx.fillStyle = "#1e140d";
+        ctx.beginPath();
+        ctx.ellipse(-22 + tailSwish1, -5, 2.0, 3.8, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Neck
+        ctx.fillStyle = "#c8521e";
+        ctx.beginPath();
+        ctx.moveTo(13, -13);
+        ctx.lineTo(21, -19 + graze1);
+        ctx.lineTo(27, -15 + graze1);
+        ctx.lineTo(16, -8);
+        ctx.closePath();
+        ctx.fill();
+
+        // Head
+        ctx.fillStyle = "#b34617";
+        ctx.beginPath();
+        ctx.roundRect(18, -26 + graze1, 12, 10.5, 3);
+        ctx.fill();
+
+        // Horns
+        ctx.strokeStyle = "#382c22";
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(19, -26 + graze1);
+        ctx.quadraticCurveTo(19, -33 + graze1, 23, -31 + graze1);
+        ctx.stroke();
+
+        // Alert ear
+        ctx.fillStyle = "#7a2b0e";
+        ctx.beginPath();
+        ctx.ellipse(16, -24 + graze1, 3.8, 1.8, 0.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye
+        ctx.fillStyle = "#140e0a";
+        ctx.beginPath();
+        ctx.arc(26, -22 + graze1, 1.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sound ripple rings when mooing
+        if (isMooing1) {
+          const rp = (t * 2.2) % 1;
+          ctx.strokeStyle = `rgba(255, 248, 215, ${(1 - rp) * 0.95})`;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.arc(30, -21 + graze1, 5 + rp * 19, -0.65, 0.65);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // 2. Cow 2: Silver-Grey Deshi Zebu Cow Grazing on Meadow Slope
+        const tailSwish2 = Math.sin(t * 3.6 + 1.2) * 4.5;
+        const isMooing2 = t >= 74.2 && t <= 76.0;
+        const graze2 = isMooing2 ? -6 : (Math.sin(t * 1.8 + 0.8) > 0.1 ? 5 : 0);
+
+        ctx.save();
+        ctx.translate(1080, 735);
+        ctx.scale(-2.9, 2.9); // facing left towards the train & kids
+
+        // Ground shadow
+        ctx.fillStyle = "rgba(18, 12, 6, 0.38)";
+        ctx.beginPath();
+        ctx.ellipse(0, 1.5, 23, 5.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 4 legs
+        [-13, -7, 8, 14].forEach((lx, idx) => {
+          ctx.strokeStyle = idx % 2 === 0 ? "#71808d" : "#9aa6b2";
+          ctx.lineWidth = 3.0;
+          ctx.beginPath();
+          ctx.moveTo(lx, -12);
+          ctx.lineTo(lx, 0);
+          ctx.stroke();
+          ctx.fillStyle = "#262c33";
+          ctx.fillRect(lx - 1.8, -1.5, 3.6, 2.8);
+        });
+
+        // Grey cow body with distinct Zebu hump
+        const cowGrad2 = ctx.createLinearGradient(0, -28, 0, -8);
+        cowGrad2.addColorStop(0, "#f0f4f8");
+        cowGrad2.addColorStop(0.55, "#c5ced6");
+        cowGrad2.addColorStop(1, "#8392a0");
+        ctx.fillStyle = cowGrad2;
+        ctx.beginPath();
+        ctx.moveTo(-18, -11);
+        ctx.quadraticCurveTo(-21, -23, -11, -24);
+        ctx.lineTo(4, -24);
+        ctx.quadraticCurveTo(9, -30, 15, -23); // hump
+        ctx.lineTo(18, -11);
+        ctx.quadraticCurveTo(0, -9, -18, -11);
+        ctx.fill();
+
+        // Tail
+        ctx.strokeStyle = "#8392a0";
+        ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        ctx.moveTo(-18, -21);
+        ctx.quadraticCurveTo(-24 + tailSwish2, -13, -21 + tailSwish2, -6);
+        ctx.stroke();
+        ctx.fillStyle = "#262c33";
+        ctx.beginPath();
+        ctx.ellipse(-21 + tailSwish2, -5, 2.0, 3.6, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Head grazing / alert motion
+        ctx.fillStyle = "#d5dbe2";
+        ctx.beginPath();
+        ctx.roundRect(17, -23 + graze2, 11, 9.5, 2.8);
+        ctx.fill();
+
+        // Horns & ears
+        ctx.strokeStyle = "#505a63";
+        ctx.lineWidth = 1.7;
+        ctx.beginPath();
+        ctx.moveTo(18, -23 + graze2);
+        ctx.lineTo(20, -29 + graze2);
+        ctx.stroke();
+
+        ctx.fillStyle = "#8392a0";
+        ctx.beginPath();
+        ctx.ellipse(15, -21 + graze2, 3.6, 1.7, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (isMooing2) {
+          const rp = (t * 2.2) % 1;
+          ctx.strokeStyle = `rgba(255, 248, 215, ${(1 - rp) * 0.95})`;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.arc(28, -18 + graze2, 5 + rp * 18, -0.65, 0.65);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // 3. Three Village Children Waving at the Passing Train
+        const kids = [
+          { role: "childBoy", x: 765, y: 725, col: "#e11d48", pCol: "#1e3a8a" },
+          { role: "childGirl", x: 815, y: 720, col: "#f59e0b", pCol: "#b45309" },
+          { role: "boy", x: 865, y: 726, col: "#06b6d4", pCol: "#1e293b" }
+        ];
+        kids.forEach((k, i) => {
+          drawPerson(ctx, {
+            x: k.x, y: k.y, scale: 1.85, dir: -1,
+            walkPhase: t * 8 + i, isWalking: false, breathe: Math.sin(t * 3),
+            wind: atm.wind, role: k.role, shirtCol: k.col, pantsCol: k.pCol,
+            armReach: -2.35 + Math.sin(t * 14 + i * 1.5) * 0.55, timeSec: t
+          });
+        });
+
+        // 4. Excited Bangladeshi Village Dog (Deshi Kukur) Bounding & Barking
+        const dogExcited = t >= 46.5 && t <= 74.0;
+        const dogJump = dogExcited ? Math.max(0, Math.sin(t * 12) * 15) : 0;
+        const dogTailWag = Math.sin(t * (dogExcited ? 18 : 6)) * 7;
+        const isDogBarking = (t >= 53.0 && t <= 54.2) || (t >= 60.3 && t <= 61.5);
+
+        ctx.save();
+        ctx.translate(690, 722 - dogJump);
+        ctx.scale(2.6, 2.6);
+
+        // Ground shadow (stretches and shrinks as dog jumps)
+        ctx.fillStyle = "rgba(18, 12, 6, 0.32)";
+        ctx.beginPath();
+        ctx.ellipse(0, 1.5 + dogJump / 2.6, 17, 4.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 4 athletic legs
+        [-10, -6, 6, 10].forEach((lx, idx) => {
+          ctx.strokeStyle = idx % 2 === 0 ? "#b45309" : "#d97706";
+          ctx.lineWidth = 2.6;
+          ctx.beginPath();
+          ctx.moveTo(lx, -10);
+          ctx.lineTo(lx + (dogExcited ? Math.sin(t * 12 + idx) * 3 : 0), 0);
+          ctx.stroke();
+          ctx.fillStyle = "#78350f";
+          ctx.fillRect(lx - 1.2, -1.2, 2.8, 2.2);
+        });
+
+        // Muscular torso
+        const dogGrad = ctx.createLinearGradient(0, -18, 0, -6);
+        dogGrad.addColorStop(0, "#f59e0b");
+        dogGrad.addColorStop(0.6, "#d97706");
+        dogGrad.addColorStop(1, "#92400e");
+        ctx.fillStyle = dogGrad;
+        ctx.beginPath();
+        ctx.roundRect(-13, -16, 21, 10.5, 4.5);
+        ctx.fill();
+
+        // Cream belly & throat
+        ctx.fillStyle = "#fef3c7";
+        ctx.beginPath();
+        ctx.ellipse(-1, -10, 7.5, 2.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Distinctive Deshi sickle tail curved tightly up over back
+        ctx.strokeStyle = "#d97706";
+        ctx.lineWidth = 2.6;
+        ctx.beginPath();
+        ctx.moveTo(-13, -14);
+        ctx.quadraticCurveTo(-19 + dogTailWag, -24, -11 + dogTailWag * 0.7, -25);
+        ctx.stroke();
+
+        // Neck & Head
+        const dHeadX = 9;
+        const dHeadY = -18 + (isDogBarking ? -3.5 : 0);
+        ctx.fillStyle = "#d97706";
+        ctx.beginPath();
+        ctx.ellipse(dHeadX, dHeadY, 5.8, 4.8, isDogBarking ? -0.28 : 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Snout & open barking mouth
+        ctx.fillStyle = "#b45309";
+        ctx.beginPath();
+        ctx.moveTo(dHeadX + 2, dHeadY - 1);
+        ctx.lineTo(dHeadX + 8.5, dHeadY);
+        ctx.lineTo(dHeadX + 7.5, dHeadY + (isDogBarking ? 5.5 : 2.5));
+        ctx.lineTo(dHeadX + 2, dHeadY + 3.4);
+        ctx.closePath();
+        ctx.fill();
+
+        if (isDogBarking) {
+          ctx.fillStyle = "#dc2626";
+          ctx.fillRect(dHeadX + 4, dHeadY + 1.2, 3.8, 2.8);
+        }
+
+        // Black nose
+        ctx.fillStyle = "#18181b";
+        ctx.beginPath();
+        ctx.arc(dHeadX + 9, dHeadY + 0.3, 1.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye
+        ctx.fillStyle = "#18181b";
+        ctx.beginPath();
+        ctx.arc(dHeadX + 2.5, dHeadY - 1.2, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Alert prick ears
+        ctx.fillStyle = "#b45309";
+        ctx.beginPath();
+        ctx.moveTo(dHeadX - 2.5, dHeadY - 2.5);
+        ctx.lineTo(dHeadX - 6, dHeadY - 10.5);
+        ctx.lineTo(dHeadX - 0.5, dHeadY - 4.5);
+        ctx.closePath();
+        ctx.fill();
+
+        // Bark sound ripple rings
+        if (isDogBarking) {
+          const rp = (t * 4.0) % 1;
+          ctx.strokeStyle = `rgba(255, 235, 175, ${(1 - rp) * 0.95})`;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.arc(dHeadX + 12, dHeadY + 1, 4 + rp * 18, -0.6, 0.6);
+          ctx.stroke();
+        }
+        ctx.restore();
+
         ctx.restore();
       }
 
