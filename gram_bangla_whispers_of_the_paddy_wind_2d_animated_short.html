@@ -1153,57 +1153,108 @@
           panner.pan.setValueAtTime(clamp(panVal, -0.9, 0.9), now);
           panner.connect(this.compressor);
 
-          const barks = doubleBark ? [0, 0.16] : [0];
-          barks.forEach((offset, idx) => {
+          // Authentic Deshi village hound bark cadence:
+          // Deep chest fundamental (165-200Hz dropping to 95-105Hz), warm guttural throat rasp,
+          // mouth cavity vowel sweep ("Bhow / Gheu"), and realistic breath pause between barks
+          const barks = doubleBark ? [
+            { offset: 0, dur: 0.24, basePitch: 180, peakPitch: 215, endPitch: 105, vol: 0.28 },
+            { offset: 0.32, dur: 0.27, basePitch: 165, peakPitch: 195, endPitch: 95, vol: 0.32 }
+          ] : [
+            { offset: 0, dur: 0.26, basePitch: 175, peakPitch: 205, endPitch: 100, vol: 0.30 }
+          ];
+
+          barks.forEach(({ offset, dur, basePitch, peakPitch, endPitch, vol }) => {
             const t0 = now + offset;
-            const dur = 0.13;
-            const baseFreq = idx === 0 ? 330 : 365;
 
-            // 1. Tonal canine vocal cords
-            const osc = this.ctx.createOscillator();
-            const f1 = this.ctx.createBiquadFilter();
-            const g = this.ctx.createGain();
+            // 1. Canine Vocal Folds (Sawtooth with natural explosive attack and pitch drop)
+            const oscMain = this.ctx.createOscillator();
+            oscMain.type = "sawtooth";
+            oscMain.frequency.setValueAtTime(basePitch, t0);
+            oscMain.frequency.linearRampToValueAtTime(peakPitch, t0 + 0.035);
+            oscMain.frequency.exponentialRampToValueAtTime(endPitch, t0 + dur);
 
-            osc.type = "sawtooth";
-            osc.frequency.setValueAtTime(baseFreq, t0);
-            osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.15, t0 + 0.025);
-            osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.58, t0 + dur);
+            // 2. Chest & Sub-guttural resonance (Triangle sub-harmonic for deep canine chest thud)
+            const oscSub = this.ctx.createOscillator();
+            oscSub.type = "triangle";
+            oscSub.frequency.setValueAtTime(basePitch * 0.5, t0);
+            oscSub.frequency.exponentialRampToValueAtTime(endPitch * 0.5, t0 + dur);
 
-            f1.type = "bandpass";
-            f1.frequency.setValueAtTime(780, t0);
-            f1.frequency.exponentialRampToValueAtTime(520, t0 + dur);
-            f1.Q.setValueAtTime(2.8, t0);
+            // 3. Mouth & Throat Formant Filter ("B-H-O-W" / "G-H-E-U" oral cavity sweep)
+            const throatFilter = this.ctx.createBiquadFilter();
+            throatFilter.type = "lowpass";
+            throatFilter.frequency.setValueAtTime(950, t0);
+            throatFilter.frequency.exponentialRampToValueAtTime(420, t0 + dur);
+            throatFilter.Q.setValueAtTime(1.6, t0);
 
-            g.gain.setValueAtTime(0.0001, t0);
-            g.gain.linearRampToValueAtTime(0.16, t0 + 0.018);
-            g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+            // Mouth resonance peak (formant peak around 500-600Hz)
+            const mouthFilter = this.ctx.createBiquadFilter();
+            mouthFilter.type = "bandpass";
+            mouthFilter.frequency.setValueAtTime(620, t0);
+            mouthFilter.frequency.exponentialRampToValueAtTime(360, t0 + dur);
+            mouthFilter.Q.setValueAtTime(1.4, t0);
 
-            osc.connect(f1);
-            f1.connect(g);
-            g.connect(panner);
+            // 4. Canine Throat Growl / Vocal Cord Rasp (Overdrive WaveShaper)
+            const dist = this.ctx.createWaveShaper();
+            if (!this._barkCurve) {
+              const n = 512, curve = new Float32Array(n);
+              for (let i = 0; i < n; i++) {
+                const x = (i * 2) / n - 1;
+                // Soft clipping sigmoid with warm canine guttural saturation
+                curve[i] = (Math.PI + 4) * x / (Math.PI + 4 * Math.abs(x));
+              }
+              this._barkCurve = curve;
+            }
+            dist.curve = this._barkCurve;
 
-            // 2. Husky throat breath
+            // Main voice gain envelope (explosive attack, full body, smooth release)
+            const voiceGain = this.ctx.createGain();
+            voiceGain.gain.setValueAtTime(0.0001, t0);
+            voiceGain.gain.linearRampToValueAtTime(vol, t0 + 0.025);
+            voiceGain.gain.setValueAtTime(vol * 0.9, t0 + 0.08);
+            voiceGain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+            // Sub gain envelope (deep chest thud on attack)
+            const subGain = this.ctx.createGain();
+            subGain.gain.setValueAtTime(0.0001, t0);
+            subGain.gain.linearRampToValueAtTime(vol * 0.65, t0 + 0.03);
+            subGain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.7);
+
+            // 5. Explosive Lung Chuff / Breath Noise Burst ("Whuff")
             const noise = this.ctx.createBufferSource();
             noise.buffer = this.whiteBuffer;
-            const nf = this.ctx.createBiquadFilter();
-            const ng = this.ctx.createGain();
+            const noiseFilter = this.ctx.createBiquadFilter();
+            noiseFilter.type = "bandpass";
+            noiseFilter.frequency.setValueAtTime(480, t0);
+            noiseFilter.frequency.exponentialRampToValueAtTime(280, t0 + dur * 0.5);
+            noiseFilter.Q.setValueAtTime(1.1, t0);
 
-            nf.type = "bandpass";
-            nf.frequency.setValueAtTime(1100, t0);
-            nf.Q.setValueAtTime(2.0, t0);
+            const noiseGain = this.ctx.createGain();
+            noiseGain.gain.setValueAtTime(0.0001, t0);
+            noiseGain.gain.linearRampToValueAtTime(vol * 0.45, t0 + 0.02);
+            noiseGain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.45);
 
-            ng.gain.setValueAtTime(0.0001, t0);
-            ng.gain.linearRampToValueAtTime(0.075, t0 + 0.01);
-            ng.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.7);
+            // Connections
+            oscMain.connect(throatFilter);
+            throatFilter.connect(dist);
+            dist.connect(mouthFilter);
+            mouthFilter.connect(voiceGain);
+            voiceGain.connect(panner);
 
-            noise.connect(nf);
-            nf.connect(ng);
-            ng.connect(panner);
+            oscSub.connect(subGain);
+            subGain.connect(panner);
 
-            osc.start(t0);
+            noise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(panner);
+
+            // Start & stop nodes
+            oscMain.start(t0);
+            oscSub.start(t0);
             noise.start(t0);
-            osc.stop(t0 + dur + 0.02);
-            noise.stop(t0 + dur + 0.02);
+
+            oscMain.stop(t0 + dur + 0.04);
+            oscSub.stop(t0 + dur + 0.04);
+            noise.stop(t0 + dur + 0.04);
           });
 
           this.showAudioTag("দেশি কুকুর · Dog Bark");
@@ -3641,7 +3692,7 @@
 
       function drawVillageDog(ctx, dog, t) {
         ctx.save();
-        const isBarking = dog.barkTimes.some(bt => t >= bt && t <= bt + 0.55);
+        const isBarking = dog.barkTimes.some(bt => t >= bt && t <= bt + 0.62);
         let posX = dog.baseX;
         let posY = dog.baseY;
         let dir = dog.dir;
