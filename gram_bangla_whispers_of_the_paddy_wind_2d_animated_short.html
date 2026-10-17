@@ -1,0 +1,5221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gram Bangla — Whispers of the Paddy Wind (2D Animated Short)</title>
+<style>
+  :root {
+    --bg-dark: #0d0c0a;
+    --panel-bg: rgba(16, 14, 11, 0.78);
+    --accent: #e2a952;
+    --accent-soft: rgba(226, 169, 82, 0.26);
+    --text-main: #f4ebd9;
+    --text-muted: #cbbba0;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  html, body {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", sans-serif;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #stage-wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, #1c1813 0%, #090806 100%);
+  }
+  #viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: calc(100vh * (16 / 9));
+    max-height: calc(100vw * (9 / 16));
+    aspect-ratio: 16 / 9;
+    background: #14120e;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(244, 235, 217, 0.12);
+    overflow: hidden;
+    border-radius: 4px;
+  }
+  canvas#film-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: pointer;
+  }
+
+  /* Start Overlay */
+  #start-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(18, 14, 10, 0.48) 0%, rgba(12, 10, 8, 0.88) 100%);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    padding: 24px;
+    text-align: center;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+  #start-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .film-badge {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #ffd996;
+    background: rgba(226, 169, 82, 0.16);
+    border: 1px solid rgba(226, 169, 82, 0.42);
+    padding: 5px 15px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .film-title-bn {
+    font-size: clamp(26px, 4.4vw, 50px);
+    font-weight: 700;
+    font-family: "Noto Serif Bengali", "SolaimanLipi", Georgia, serif;
+    color: #fff5e1;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.75);
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+  }
+  .film-title-en {
+    font-size: clamp(17px, 2.3vw, 26px);
+    font-weight: 400;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    color: #f5cba7;
+    margin-bottom: 12px;
+  }
+  .film-desc {
+    max-width: 540px;
+    font-size: clamp(12px, 1.35vw, 14.5px);
+    line-height: 1.6;
+    color: rgba(244, 235, 217, 0.86);
+    margin-bottom: 26px;
+  }
+  #tap-start-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 32px;
+    font-size: clamp(14px, 1.7vw, 17px);
+    font-weight: 600;
+    color: #1c140a;
+    background: linear-gradient(135deg, #ffe0a3 0%, #e2a952 100%);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(226, 169, 82, 0.42), inset 0 1px 0 rgba(255,255,255,0.65);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  #tap-start-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 14px 36px rgba(226, 169, 82, 0.58), inset 0 1px 0 rgba(255,255,255,0.85);
+  }
+  #tap-start-btn:active {
+    transform: translateY(0) scale(0.99);
+  }
+  .scene-pills-preview {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  .scene-pill-tag {
+    font-size: 11px;
+    color: #ffe0a3;
+    background: rgba(244, 235, 217, 0.08);
+    padding: 4px 11px;
+    border-radius: 999px;
+    border: 1px solid rgba(244, 235, 217, 0.16);
+  }
+
+  /* HUD Top Scene Indicator */
+  #hud-top {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    z-index: 20;
+    transition: opacity 0.5s ease;
+  }
+  .hud-pill {
+    background: var(--panel-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(244, 235, 217, 0.16);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+  }
+  .hud-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ffd996;
+    box-shadow: 0 0 8px #ffd996;
+  }
+  #active-audio-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .audio-cue-chip {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(226, 169, 82, 0.24);
+    border: 1px solid rgba(226, 169, 82, 0.5);
+    color: #ffe0a3;
+    animation: fadePulse 0.25s ease-out;
+  }
+  @keyframes fadePulse {
+    from { transform: scale(0.9); opacity: 0.4; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Bottom Control Bar */
+  #controls-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(0deg, rgba(13, 12, 10, 0.92) 0%, rgba(13, 12, 10, 0.65) 72%, transparent 100%);
+    padding: 18px 18px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 25;
+    transition: opacity 0.4s ease;
+  }
+  #viewport.idle-cursor #controls-bar,
+  #viewport.idle-cursor #hud-top {
+    opacity: 0.18;
+  }
+  #controls-bar:hover,
+  #hud-top:hover {
+    opacity: 1 !important;
+  }
+
+  /* Timeline Scrubber & Scene Markers */
+  .timeline-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .scene-markers-row {
+    display: flex;
+    width: 100%;
+    gap: 4px;
+  }
+  .scene-jump-btn {
+    flex: 1;
+    background: rgba(244, 235, 217, 0.08);
+    border: 1px solid rgba(244, 235, 217, 0.14);
+    color: rgba(244, 235, 217, 0.78);
+    font-size: 10.5px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.2s ease;
+  }
+  .scene-jump-btn:hover {
+    background: rgba(226, 169, 82, 0.22);
+    color: #fff8eb;
+  }
+  .scene-jump-btn.active {
+    background: rgba(226, 169, 82, 0.28);
+    border-color: rgba(226, 169, 82, 0.65);
+    color: #ffd996;
+    font-weight: 600;
+  }
+  #timeline-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(229,152,102,0.35), rgba(245,203,167,0.35), rgba(127,179,213,0.35), rgba(243,156,18,0.35));
+    outline: none;
+    cursor: pointer;
+  }
+  #timeline-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffd996;
+    box-shadow: 0 0 10px rgba(255, 217, 150, 0.9);
+    cursor: pointer;
+  }
+
+  /* Buttons Row */
+  .controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .controls-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ctrl-btn {
+    background: rgba(16, 14, 11, 0.68);
+    border: 1px solid rgba(244, 235, 217, 0.18);
+    color: var(--text-main);
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .ctrl-btn:hover {
+    background: rgba(226, 169, 82, 0.22);
+    border-color: rgba(226, 169, 82, 0.45);
+    color: #fff8eb;
+  }
+  .ctrl-btn:active {
+    transform: scale(0.97);
+  }
+  .ctrl-btn svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+  }
+  .time-readout {
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    color: #ffd996;
+    margin-left: 4px;
+  }
+  #volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 78px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(244, 235, 217, 0.25);
+    outline: none;
+    cursor: pointer;
+  }
+  #volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffd996;
+    cursor: pointer;
+  }
+
+  @media (max-width: 640px) {
+    .scene-jump-btn {
+      font-size: 9px;
+      padding: 3px 4px;
+    }
+    .ctrl-btn span.btn-label {
+      display: none;
+    }
+    #volume-slider {
+      width: 54px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage-wrapper">
+  <div id="viewport">
+    <canvas id="film-canvas" width="1600" height="900"></canvas>
+
+    <!-- Top HUD -->
+    <div id="hud-top">
+      <div class="hud-pill">
+        <span class="hud-dot" id="status-dot"></span>
+        <span id="scene-label">১ · ভোর ও নদী — Scene 1: Aerial Glide Over Gram Bangla</span>
+      </div>
+      <div id="active-audio-tags"></div>
+    </div>
+
+    <!-- Start Screen Overlay (Required for Web Audio API Gesture) -->
+    <div id="start-overlay">
+      <div class="film-badge">Hand-Painted Gouache 2D Short • 1:40</div>
+      <h1 class="film-title-bn">ফেলে আসা গ্রাম — ধানক্ষেত ও রেলগাড়ির গল্প</h1>
+      <div class="film-title-en">Gram Bangla: Whispers of the Paddy Wind</div>
+      <p class="film-desc">
+        A hand-painted Studio Ghibli &amp; 1990s Bangladeshi village memory—multi-layered banyan &amp; mango canopies, golden paddy ripples, country boats casting circular nets, and the afternoon express train.
+      </p>
+      <button id="tap-start-btn" type="button">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Tap to Begin Short Film
+      </button>
+      <div class="scene-pills-preview">
+        <span class="scene-pill-tag">১ • 0:00–0:25 Aerial Glide</span>
+        <span class="scene-pill-tag">২ • 0:25–0:45 River &amp; Cast Nets</span>
+        <span class="scene-pill-tag">৩ • 0:45–1:20 Ground Train Cut</span>
+        <span class="scene-pill-tag">৪ • 1:20–1:40 Golden Hour &amp; Fireflies</span>
+      </div>
+    </div>
+
+    <!-- Bottom Controls -->
+    <div id="controls-bar">
+      <div class="timeline-container">
+        <div class="scene-markers-row" id="scene-buttons">
+          <button type="button" class="scene-jump-btn active" data-time="0" style="flex:25">1. Drone (0:00)</button>
+          <button type="button" class="scene-jump-btn" data-time="25" style="flex:20">2. River (0:25)</button>
+          <button type="button" class="scene-jump-btn" data-time="45" style="flex:35">3. Train (0:45)</button>
+          <button type="button" class="scene-jump-btn" data-time="80" style="flex:20">4. Sunset (1:20)</button>
+        </div>
+        <input type="range" id="timeline-slider" min="0" max="100" step="0.05" value="0" aria-label="Film Timeline">
+      </div>
+
+      <div class="controls-row">
+        <div class="controls-group">
+          <button type="button" class="ctrl-btn" id="play-pause-btn" aria-label="Play or Pause">
+            <svg id="play-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            <span class="btn-label" id="play-label">Pause</span>
+          </button>
+          <button type="button" class="ctrl-btn" id="restart-btn" aria-label="Restart">
+            <svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+            <span class="btn-label">Restart</span>
+          </button>
+          <span class="time-readout" id="time-display">0:00 / 1:40</span>
+        </div>
+
+        <div class="controls-group">
+          <button type="button" class="ctrl-btn" id="mute-btn" aria-label="Mute or Unmute">
+            <svg id="vol-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+            <span class="btn-label" id="mute-label">Audio</span>
+          </button>
+          <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.85" aria-label="Master Volume">
+          <button type="button" class="ctrl-btn" id="fullscreen-btn" aria-label="Fullscreen">
+            <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+            <span class="btn-label">Fullscreen</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ============================================================================
+  // 0. DETERMINISTIC PRNG, 2D PERLIN/FBM NOISE FIELD & COLOR GRADING UTILITIES
+  // ============================================================================
+  function mulberry32(seed = 19941014) {
+    let a = seed >>> 0;
+    return function() {
+      a |= 0;
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const createPRNG = mulberry32;
+
+  const PERM = new Uint8Array(512);
+  const GRAD = new Float32Array(256);
+  {
+    const nRng = mulberry32(901990);
+    const p = new Uint8Array(256);
+    for (let i = 0; i < 256; i++) {
+      p[i] = i;
+      GRAD[i] = nRng() * 2 - 1;
+    }
+    for (let i = 255; i > 0; i--) {
+      const j = Math.floor(nRng() * (i + 1));
+      const tmp = p[i];
+      p[i] = p[j];
+      p[j] = tmp;
+    }
+    for (let i = 0; i < 512; i++) PERM[i] = p[i & 255];
+  }
+
+  const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+  const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
+  const lerp = (a, b, t) => a + (b - a) * clamp(t, 0, 1);
+  const smoothstep = (e0, e1, x) => {
+    const t = clamp((x - e0) / (e1 - e0), 0, 1);
+    return t * t * (3 - 2 * t);
+  };
+  const easeInOutCubic = (t) => {
+    t = clamp(t, 0, 1);
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  };
+
+  function noise2D(x, y) {
+    const xi = Math.floor(x) & 255;
+    const yi = Math.floor(y) & 255;
+    const xf = x - Math.floor(x);
+    const yf = y - Math.floor(y);
+    const u = fade(xf);
+    const v = fade(yf);
+    const aa = PERM[PERM[xi] + yi];
+    const ab = PERM[PERM[xi] + yi + 1];
+    const ba = PERM[PERM[xi + 1] + yi];
+    const bb = PERM[PERM[xi + 1] + yi + 1];
+    return lerp(lerp(GRAD[aa], GRAD[ba], u), lerp(GRAD[ab], GRAD[bb], u), v);
+  }
+
+  function fbm2D(x, y) {
+    return 0.55 * noise2D(x, y) + 0.30 * noise2D(x * 2.03, y * 2.03) + 0.15 * noise2D(x * 4.07, y * 4.07);
+  }
+
+  function sampleWind(x, y, t, windStrength = 0.28) {
+    const w1 = noise2D(x * 0.004 - t * (0.45 + windStrength * 1.1), y * 0.004 + t * 0.15);
+    const w2 = Math.sin(x * 0.012 - t * (1.8 + windStrength * 3.2)) * 0.35;
+    return (w1 + w2 + windStrength * 0.65) * windStrength;
+  }
+
+  function hexToRgb(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function lerpColor(c1, c2, t) {
+    const u = clamp(t, 0, 1);
+    const r = Math.round(lerp(c1[0], c2[0], u));
+    const g = Math.round(lerp(c1[1], c2[1], u));
+    const b = Math.round(lerp(c1[2], c2[2], u));
+    return `rgb(${r},${g},${b})`;
+  }
+  function lerpRgba(c1, c2, t, alpha) {
+    const u = clamp(t, 0, 1);
+    const r = Math.round(lerp(c1[0], c2[0], u));
+    const g = Math.round(lerp(c1[1], c2[1], u));
+    const b = Math.round(lerp(c1[2], c2[2], u));
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  function quadBezier(p0, p1, p2, t) {
+    const inv = 1 - t;
+    return {
+      x: inv * inv * p0.x + 2 * inv * t * p1.x + t * t * p2.x,
+      y: inv * inv * p0.y + 2 * inv * t * p1.y + t * t * p2.y
+    };
+  }
+  function quadBezierDeriv(p0, p1, p2, t) {
+    return {
+      dx: 2 * (1 - t) * (p1.x - p0.x) + 2 * t * (p2.x - p1.x),
+      dy: 2 * (1 - t) * (p1.y - p0.y) + 2 * t * (p2.y - p1.y)
+    };
+  }
+
+  // ============================================================================
+  // 1. FILM TIMELINE, SCENE CONFIG & COLOR GRADING PALETTES (100.0s = 1:40)
+  // ============================================================================
+  const TOTAL_DURATION = 100.0;
+  const CW = 1600;
+  const CH = 900;
+  const WW = 2400;
+  const WH = 1350;
+
+  const SCENES = [
+    { id: 1, start: 0,  end: 25,  title: "১ · ভোর ও ধানক্ষেত — Scene 1: Aerial Glide Over Gram Bangla" },
+    { id: 2, start: 25, end: 45,  title: "২ · নদী ও খেপলা জাল — Scene 2: River Bend & Circular Fishing Nets" },
+    { id: 3, start: 45, end: 80,  title: "৩ · দুপুরের রেলগাড়ি — Scene 3: Ground Cut — The Afternoon Express" },
+    { id: 4, start: 80, end: 100, title: "৪ · গোধূলি ও জোনাকি — Scene 4: Golden Hour Sunset & Calm Return" }
+  ];
+
+  // Rich Gouache Color Palettes from Reference Project
+  const PALETTES = {
+    morning: {
+      skyTop: hexToRgb("#3e5b78"),
+      skyMid: hexToRgb("#c69b7b"),
+      skyHor: hexToRgb("#f6d79e"),
+      waterTop: hexToRgb("#b58c6e"),
+      waterBot: hexToRgb("#2d4a43"),
+      ambient: [254, 224, 178],
+      shadowAlpha: 0.12
+    },
+    day: {
+      skyTop: hexToRgb("#4f95b8"),
+      skyMid: hexToRgb("#95cadb"),
+      skyHor: hexToRgb("#e6f0d5"),
+      waterTop: hexToRgb("#6da8ba"),
+      waterBot: hexToRgb("#2a5c4a"),
+      ambient: [255, 250, 232],
+      shadowAlpha: 0.04
+    },
+    golden: {
+      skyTop: hexToRgb("#3f3b6c"),
+      skyMid: hexToRgb("#c76b55"),
+      skyHor: hexToRgb("#f8c471"),
+      waterTop: hexToRgb("#b86b52"),
+      waterBot: hexToRgb("#2c3a42"),
+      ambient: [255, 194, 128],
+      shadowAlpha: 0.22
+    },
+    dusk: {
+      skyTop: hexToRgb("#1d2642"),
+      skyMid: hexToRgb("#7c4958"),
+      skyHor: hexToRgb("#e59866"),
+      waterTop: hexToRgb("#754852"),
+      waterBot: hexToRgb("#182432"),
+      ambient: [195, 140, 118],
+      shadowAlpha: 0.34
+    }
+  };
+
+  function mixPalette(pA, pB, t) {
+    const u = clamp(t, 0, 1);
+    return {
+      skyTop: [lerp(pA.skyTop[0], pB.skyTop[0], u), lerp(pA.skyTop[1], pB.skyTop[1], u), lerp(pA.skyTop[2], pB.skyTop[2], u)],
+      skyMid: [lerp(pA.skyMid[0], pB.skyMid[0], u), lerp(pA.skyMid[1], pB.skyMid[1], u), lerp(pA.skyMid[2], pB.skyMid[2], u)],
+      skyHor: [lerp(pA.skyHor[0], pB.skyHor[0], u), lerp(pA.skyHor[1], pB.skyHor[1], u), lerp(pA.skyHor[2], pB.skyHor[2], u)],
+      waterTop: [lerp(pA.waterTop[0], pB.waterTop[0], u), lerp(pA.waterTop[1], pB.waterTop[1], u), lerp(pA.waterTop[2], pB.waterTop[2], u)],
+      waterBot: [lerp(pA.waterBot[0], pB.waterBot[0], u), lerp(pA.waterBot[1], pB.waterBot[1], u), lerp(pA.waterBot[2], pB.waterBot[2], u)],
+      ambient: [lerp(pA.ambient[0], pB.ambient[0], u), lerp(pA.ambient[1], pB.ambient[1], u), lerp(pA.ambient[2], pB.ambient[2], u)],
+      shadowAlpha: lerp(pA.shadowAlpha, pB.shadowAlpha, u)
+    };
+  }
+
+  function computeAtmosphere(t) {
+    let pal;
+    if (t < 18) {
+      pal = mixPalette(PALETTES.morning, PALETTES.day, smoothstep(0, 18, t));
+    } else if (t < 73) {
+      pal = PALETTES.day;
+    } else if (t < 90) {
+      pal = mixPalette(PALETTES.day, PALETTES.golden, smoothstep(73, 90, t));
+    } else {
+      pal = mixPalette(PALETTES.golden, PALETTES.dusk, smoothstep(90, 100, t));
+    }
+    const mist = clamp(1.0 - smoothstep(2, 18, t) + smoothstep(87, 100, t) * 0.45, 0, 1);
+    const sunsetAmt = smoothstep(76, 93, t);
+    const lantern = smoothstep(81, 89, t);
+    const fireflyAmt = smoothstep(85, 93, t);
+    const wind = 0.24 + 0.08 * Math.sin(t * 0.35);
+    return { pal, mist, sunsetAmt, lantern, fireflyAmt, wind };
+  }
+
+  const TRACK_P0 = { x: 1010, y: 1370 };
+  const TRACK_P1 = { x: 1175, y: 690 };
+  const TRACK_P2 = { x: 1930, y: 235 };
+
+  // ============================================================================
+  // 2. PROCEDURAL WEB AUDIO API SOUND DESIGN ENGINE (REFERENCE 2D TRAIN AUDIO)
+  // ============================================================================
+  const JOINT_PX = 96;                      // one rail length between joints (from Reference Code)
+  const AXLES = [0, 8, 30, 38];             // a carriage's two bogies: clickety ... clack
+  const HORN_TONES = [311.1, 370.0];        // E-flat and F-sharp: two-tone chord of a BR diesel air horn
+
+  // Shared train simulation state for synchronized visuals & audio
+  const trainSim = {
+    speed: 80,
+    dist: 0,
+    wheelAngle: 0,
+    swayPhase: 0,
+    rpm: 0.65,
+    hornWave: 0,
+    jointAcc: 0,
+    smokeAcc: 0,
+    sparkAcc: 0,
+    lastT: -1
+  };
+
+  class SoundEngine {
+    constructor() {
+      this.ctx = null;
+      this.masterGain = null;
+      this.compressor = null;
+      this.isMuted = false;
+      this.userVolume = 0.85;
+      this.initialized = false;
+
+      this.windGain = null;
+      this.windFilter = null;
+      this.paddyGain = null;
+      this.waterGain = null;
+      this.waterPan = null;
+      this.cricketGain = null;
+      this.railHumGain = null;
+
+      // Exact Reference Code Train Audio Nodes
+      this.trainPan = null;
+      this.rumble = null;
+      this.metal = null;
+      this.boom = null;
+      this.engine = null;
+      this.engOsc = null;
+      this.engSub = null;
+      this.engLfo = null;
+      this.squeal = null;
+
+      this.musicGain = null;
+      this.firedCues = new Set();
+      this.nextBirdTime = 1.2;
+      this.nextFluteTime = 2.0;
+      this.fluteNoteIdx = 0;
+    }
+
+    init() {
+      if (this.initialized) {
+        if (this.ctx && this.ctx.state === "suspended") {
+          this.ctx.resume();
+        }
+        return;
+      }
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      this.ctx = new AudioCtx();
+      this.compressor = this.ctx.createDynamicsCompressor();
+      this.compressor.threshold.setValueAtTime(-16, this.ctx.currentTime);
+      this.compressor.knee.setValueAtTime(18, this.ctx.currentTime);
+      this.compressor.ratio.setValueAtTime(6, this.ctx.currentTime);
+      this.compressor.attack.setValueAtTime(0.005, this.ctx.currentTime);
+      this.compressor.release.setValueAtTime(0.2, this.ctx.currentTime);
+
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.userVolume, this.ctx.currentTime);
+
+      this.compressor.connect(this.masterGain);
+      this.masterGain.connect(this.ctx.destination);
+
+      const sr = this.ctx.sampleRate;
+      const bufLen = sr * 2;
+      this.whiteBuffer = this.ctx.createBuffer(1, bufLen, sr);
+      this.pinkBuffer = this.ctx.createBuffer(1, bufLen, sr);
+      const wData = this.whiteBuffer.getChannelData(0);
+      const pData = this.pinkBuffer.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < bufLen; i++) {
+        const white = Math.random() * 2 - 1;
+        wData[i] = white;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        b3 = 0.86650 * b3 + white * 0.3104856;
+        b4 = 0.55000 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.0168980;
+        pData[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.045;
+        b6 = white * 0.115926;
+      }
+
+      this.setupAmbientBeds();
+      this.initialized = true;
+    }
+
+    setupAmbientBeds() {
+      const ac = this.ctx;
+      const now = ac.currentTime;
+      const buf = this.whiteBuffer;
+
+      const loop = () => {
+        const s = ac.createBufferSource();
+        s.buffer = buf;
+        s.loop = true;
+        s.start(0, Math.random() * 1.8);
+        return s;
+      };
+      const filt = (type, f, q) => {
+        const b = ac.createBiquadFilter();
+        b.type = type;
+        b.frequency.value = f;
+        if (q) b.Q.value = q;
+        return b;
+      };
+      const gain = (v) => {
+        const n = ac.createGain();
+        n.gain.value = v;
+        return n;
+      };
+      const chain = (nodes) => {
+        for (let i = 0; i < nodes.length - 1; i++) nodes[i].connect(nodes[i + 1]);
+      };
+      const lfo = (hz, depth, param) => {
+        const o = ac.createOscillator();
+        const gn = gain(depth);
+        o.frequency.value = hz;
+        o.connect(gn);
+        gn.connect(param);
+        o.start();
+      };
+
+      // Village Wind Bed
+      const windSrc = ac.createBufferSource();
+      windSrc.buffer = this.pinkBuffer;
+      windSrc.loop = true;
+      this.windFilter = filt("bandpass", 340, 1.6);
+      this.windGain = gain(0.16);
+      chain([windSrc, this.windFilter, this.windGain, this.compressor]);
+      windSrc.start(now);
+
+      // Paddy Rustle Bed
+      const paddySrc = loop();
+      const paddyFilter = filt("bandpass", 1950, 2.5);
+      this.paddyGain = gain(0.025);
+      chain([paddySrc, paddyFilter, this.paddyGain, this.compressor]);
+
+      // River Water Bed
+      const waterSrc = ac.createBufferSource();
+      waterSrc.buffer = this.pinkBuffer;
+      waterSrc.loop = true;
+      this.waterFilter = filt("bandpass", 620, 3.2);
+      this.waterGain = gain(0.06);
+      this.waterPan = ac.createStereoPanner();
+      this.waterPan.pan.setValueAtTime(0.35, now);
+      chain([waterSrc, this.waterFilter, this.waterGain, this.waterPan, this.compressor]);
+      waterSrc.start(now);
+
+      // Evening Crickets Bed
+      const cOsc1 = ac.createOscillator();
+      const cOsc2 = ac.createOscillator();
+      const cLfo = ac.createOscillator();
+      const cLfoGain = gain(0.008);
+      this.cricketGain = gain(0.006);
+      cOsc1.type = "sine";
+      cOsc2.type = "sine";
+      cOsc1.frequency.setValueAtTime(4350, now);
+      cOsc2.frequency.setValueAtTime(4368, now);
+      cLfo.frequency.setValueAtTime(16, now);
+      cLfo.connect(cLfoGain);
+      cLfoGain.connect(this.cricketGain.gain);
+      cOsc1.connect(this.cricketGain);
+      cOsc2.connect(this.cricketGain);
+      this.cricketGain.connect(this.compressor);
+      cOsc1.start(now);
+      cOsc2.start(now);
+      cLfo.start(now);
+
+      // Singing Steel Rails before arrival
+      const rOsc1 = ac.createOscillator();
+      const rOsc2 = ac.createOscillator();
+      rOsc1.type = "sine";
+      rOsc2.type = "triangle";
+      rOsc1.frequency.setValueAtTime(440, now);
+      rOsc2.frequency.setValueAtTime(1320, now);
+      const railHumFilter = filt("bandpass", 1100, 6.0);
+      this.railHumGain = gain(0.0001);
+      rOsc1.connect(railHumFilter);
+      rOsc2.connect(railHumFilter);
+      railHumFilter.connect(this.railHumGain);
+      this.railHumGain.connect(this.compressor);
+      rOsc1.start(now);
+      rOsc2.start(now);
+
+      // ======================================================================
+      // EXACT REFERENCE CODE TRAIN AUDIO GRAPH (Rumble, Metal, Boom, Diesel Engine, Squeal)
+      // ======================================================================
+      this.trainPan = ac.createStereoPanner();
+      this.trainPan.pan.setValueAtTime(0, now);
+      this.trainPan.connect(this.compressor);
+
+      // Wheels on rails: low rumble always, ringing steel note & hollow boom
+      this.rumble = gain(0);
+      chain([loop(), filt("lowpass", 220), this.rumble, this.trainPan]);
+
+      this.metal = gain(0);
+      chain([loop(), filt("bandpass", 2600, 7), this.metal, this.trainPan]);
+
+      this.boom = gain(0);
+      chain([loop(), filt("bandpass", 110, 4), this.boom, this.trainPan]);
+
+      // Diesel engine: low sawtooth, sub-octave square and clatter, pulsing with firing strokes
+      this.engine = gain(0);
+      const fire = gain(0.6);
+      const osc = (type) => {
+        const o = ac.createOscillator();
+        o.type = type;
+        o.start();
+        return o;
+      };
+      this.engOsc = osc("sawtooth");
+      this.engSub = osc("square");
+      this.engLfo = osc("sine");
+      chain([this.engOsc, filt("lowpass", 300), fire]);
+      chain([this.engSub, filt("lowpass", 150), gain(0.5), fire]);
+      chain([loop(), filt("bandpass", 190, 1.4), gain(1.2), fire]);
+      const beat = gain(0.4);
+      this.engLfo.connect(beat);
+      beat.connect(fire.gain);
+      chain([fire, this.engine, this.trainPan]);
+
+      // Brake / flange squeal
+      this.squeal = gain(0);
+      const sq = osc("sine");
+      sq.frequency.value = 3150;
+      lfo(6.5, 40, sq.frequency);
+      chain([sq, this.squeal, this.trainPan]);
+
+      this.musicGain = gain(0.26);
+      this.musicGain.connect(this.compressor);
+    }
+
+    setVolume(val) {
+      this.userVolume = clamp(val, 0, 1);
+      if (this.masterGain && this.ctx) {
+        this.masterGain.gain.setTargetAtTime(this.isMuted ? 0 : this.userVolume, this.ctx.currentTime, 0.04);
+      }
+    }
+
+    toggleMute() {
+      this.isMuted = !this.isMuted;
+      this.setVolume(this.userVolume);
+      return this.isMuted;
+    }
+
+    pause() {
+      if (this.ctx && this.ctx.state === "running") {
+        this.ctx.suspend();
+      }
+    }
+
+    resume() {
+      if (this.ctx && this.ctx.state === "suspended") {
+        this.ctx.resume();
+      }
+    }
+
+    resetCues(time) {
+      this.firedCues.clear();
+      for (const cue of TIMELINE_AUDIO_CUES) {
+        if (cue.t < time - 0.1) {
+          this.firedCues.add(cue.id);
+        }
+      }
+      trainSim.jointAcc = 0;
+      this.nextBirdTime = time + 0.6;
+      this.nextFluteTime = time + 0.8;
+    }
+
+    showAudioTag(label) {
+      const container = document.getElementById("active-audio-tags");
+      if (!container) return;
+      const chip = document.createElement("span");
+      chip.className = "audio-cue-chip";
+      chip.textContent = "♪ " + label;
+      container.appendChild(chip);
+      while (container.children.length > 3) {
+        container.removeChild(container.firstChild);
+      }
+      setTimeout(() => {
+        if (chip.parentNode) chip.parentNode.removeChild(chip);
+      }, 2100);
+    }
+
+    playBird(type = "doel", panVal = 0, distGain = 0.12) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+      const panner = this.ctx.createStereoPanner();
+      panner.pan.setValueAtTime(clamp(panVal, -0.95, 0.95), now);
+      panner.connect(this.compressor);
+
+      if (type === "koel") {
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(1050, now + 0.18);
+        osc.frequency.setValueAtTime(980, now + 0.22);
+        osc.frequency.exponentialRampToValueAtTime(1480, now + 0.62);
+
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.linearRampToValueAtTime(distGain * 0.7, now + 0.06);
+        g.gain.setValueAtTime(0.01, now + 0.2);
+        g.gain.linearRampToValueAtTime(distGain, now + 0.32);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
+
+        osc.connect(g);
+        g.connect(panner);
+        osc.start(now);
+        osc.stop(now + 0.78);
+        this.showAudioTag("কোকিল · Kokil Call");
+      } else if (type === "crow") {
+        for (let i = 0; i < 2; i++) {
+          const t0 = now + i * 0.28;
+          const osc = this.ctx.createOscillator();
+          const filt = this.ctx.createBiquadFilter();
+          const g = this.ctx.createGain();
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(540, t0);
+          osc.frequency.linearRampToValueAtTime(410, t0 + 0.19);
+          filt.type = "bandpass";
+          filt.frequency.setValueAtTime(1250, t0);
+          filt.Q.setValueAtTime(3.5, t0);
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.linearRampToValueAtTime(distGain * 0.55, t0 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.21);
+          osc.connect(filt);
+          filt.connect(g);
+          g.connect(panner);
+          osc.start(t0);
+          osc.stop(t0 + 0.23);
+        }
+      } else if (type === "sparrow") {
+        for (let i = 0; i < 3; i++) {
+          const t0 = now + i * 0.09;
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(3200 + i * 240, t0);
+          osc.frequency.exponentialRampToValueAtTime(4200, t0 + 0.045);
+          osc.frequency.exponentialRampToValueAtTime(2900, t0 + 0.075);
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.linearRampToValueAtTime(distGain * 0.45, t0 + 0.015);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.08);
+          osc.connect(g);
+          g.connect(panner);
+          osc.start(t0);
+          osc.stop(t0 + 0.085);
+        }
+      } else {
+        const notes = [1960, 2480, 2120, 2760];
+        notes.forEach((freq, idx) => {
+          const t0 = now + idx * 0.12;
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq * 0.92, t0);
+          osc.frequency.exponentialRampToValueAtTime(freq, t0 + 0.06);
+          osc.frequency.exponentialRampToValueAtTime(freq * 0.96, t0 + 0.11);
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.linearRampToValueAtTime(distGain * 0.55, t0 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.115);
+          osc.connect(g);
+          g.connect(panner);
+          osc.start(t0);
+          osc.stop(t0 + 0.12);
+        });
+      }
+    }
+
+    playCowMoo(isCalf = false, panVal = -0.45) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+      const dur = isCalf ? 1.15 : 1.75;
+      const baseF = isCalf ? 235 : 132;
+
+      const osc1 = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      osc1.type = "sawtooth";
+      osc2.type = "triangle";
+
+      osc1.frequency.setValueAtTime(baseF * 0.88, now);
+      osc1.frequency.exponentialRampToValueAtTime(baseF * 1.16, now + dur * 0.35);
+      osc1.frequency.exponentialRampToValueAtTime(baseF * 0.84, now + dur);
+
+      osc2.frequency.setValueAtTime(baseF * 0.885, now);
+      osc2.frequency.exponentialRampToValueAtTime(baseF * 1.165, now + dur * 0.35);
+      osc2.frequency.exponentialRampToValueAtTime(baseF * 0.84, now + dur);
+
+      const f1 = this.ctx.createBiquadFilter();
+      f1.type = "bandpass";
+      f1.frequency.setValueAtTime(isCalf ? 520 : 340, now);
+      f1.frequency.linearRampToValueAtTime(isCalf ? 680 : 460, now + dur * 0.4);
+      f1.Q.setValueAtTime(3.2, now);
+
+      const f2 = this.ctx.createBiquadFilter();
+      f2.type = "lowpass";
+      f2.frequency.setValueAtTime(1100, now);
+
+      const g = this.ctx.createGain();
+      const peak = isCalf ? 0.14 : 0.18;
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.linearRampToValueAtTime(peak, now + 0.22);
+      g.gain.setValueAtTime(peak * 0.85, now + dur * 0.65);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      const panner = this.ctx.createStereoPanner();
+      panner.pan.setValueAtTime(panVal, now);
+
+      osc1.connect(f1);
+      osc2.connect(f1);
+      f1.connect(f2);
+      f2.connect(g);
+      g.connect(panner);
+      panner.connect(this.compressor);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + dur + 0.05);
+      osc2.stop(now + dur + 0.05);
+      this.showAudioTag(isCalf ? "বাছুর · Calf Bleat" : "দেশি গরু · Cow Moo");
+    }
+
+    playGoatBleat(panVal = -0.3) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+      const dur = 0.75;
+      const osc = this.ctx.createOscillator();
+      const lfo = this.ctx.createOscillator();
+      const lfoG = this.ctx.createGain();
+      const filt = this.ctx.createBiquadFilter();
+      const g = this.ctx.createGain();
+      const panner = this.ctx.createStereoPanner();
+
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(390, now);
+      osc.frequency.linearRampToValueAtTime(355, now + dur);
+
+      lfo.frequency.setValueAtTime(12.5, now);
+      lfoG.gain.setValueAtTime(22, now);
+      lfo.connect(lfoG);
+      lfoG.connect(osc.frequency);
+
+      filt.type = "bandpass";
+      filt.frequency.setValueAtTime(1150, now);
+      filt.Q.setValueAtTime(4.0, now);
+
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.linearRampToValueAtTime(0.11, now + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      panner.pan.setValueAtTime(panVal, now);
+      osc.connect(filt);
+      filt.connect(g);
+      g.connect(panner);
+      panner.connect(this.compressor);
+
+      osc.start(now);
+      lfo.start(now);
+      osc.stop(now + dur + 0.02);
+      lfo.stop(now + dur + 0.02);
+      this.showAudioTag("ছাগল · Goat Bleat");
+    }
+
+    playHenClucks(panVal = -0.35) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+      const panner = this.ctx.createStereoPanner();
+      panner.pan.setValueAtTime(panVal, now);
+      panner.connect(this.compressor);
+
+      for (let i = 0; i < 4; i++) {
+        const t0 = now + i * 0.11;
+        const osc = this.ctx.createOscillator();
+        const filt = this.ctx.createBiquadFilter();
+        const g = this.ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(520 + (i % 2) * 80, t0);
+        osc.frequency.exponentialRampToValueAtTime(790, t0 + 0.035);
+        osc.frequency.exponentialRampToValueAtTime(380, t0 + 0.07);
+
+        filt.type = "bandpass";
+        filt.frequency.setValueAtTime(980, t0);
+        filt.Q.setValueAtTime(3, t0);
+
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.linearRampToValueAtTime(0.09, t0 + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.075);
+
+        osc.connect(filt);
+        filt.connect(g);
+        g.connect(panner);
+        osc.start(t0);
+        osc.stop(t0 + 0.08);
+      }
+      this.showAudioTag("মুরগি · Hen Clucks");
+    }
+
+    playKidsLaughter(panVal = -0.35) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+      const panner = this.ctx.createStereoPanner();
+      panner.pan.setValueAtTime(panVal, now);
+      panner.connect(this.compressor);
+
+      const syllables = [580, 650, 590, 720, 640];
+      syllables.forEach((f, i) => {
+        const t0 = now + i * 0.115;
+        const osc = this.ctx.createOscillator();
+        const f1 = this.ctx.createBiquadFilter();
+        const g = this.ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(f, t0);
+        osc.frequency.exponentialRampToValueAtTime(f * 1.15, t0 + 0.04);
+        osc.frequency.exponentialRampToValueAtTime(f * 0.88, t0 + 0.095);
+
+        f1.type = "bandpass";
+        f1.frequency.setValueAtTime(1450, t0);
+        f1.Q.setValueAtTime(4.5, t0);
+
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.linearRampToValueAtTime(0.075, t0 + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.1);
+
+        osc.connect(f1);
+        f1.connect(g);
+        g.connect(panner);
+        osc.start(t0);
+        osc.stop(t0 + 0.105);
+      });
+      this.showAudioTag("শিশুদের হাসি · Kids Laughing");
+    }
+
+    playRickshawBell(panVal = -0.2) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+      const panner = this.ctx.createStereoPanner();
+      panner.pan.setValueAtTime(panVal, now);
+      panner.connect(this.compressor);
+
+      [0, 0.16].forEach((offset) => {
+        const t0 = now + offset;
+        const c = this.ctx.createOscillator();
+        const m = this.ctx.createOscillator();
+        const mGain = this.ctx.createGain();
+        const g = this.ctx.createGain();
+
+        c.type = "sine";
+        c.frequency.setValueAtTime(2680, t0);
+        m.type = "sine";
+        m.frequency.setValueAtTime(2680 * 2.41, t0);
+        mGain.gain.setValueAtTime(900, t0);
+        mGain.gain.exponentialRampToValueAtTime(10, t0 + 0.25);
+
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.linearRampToValueAtTime(0.13, t0 + 0.005);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.42);
+
+        m.connect(mGain);
+        mGain.connect(c.frequency);
+        c.connect(g);
+        g.connect(panner);
+
+        c.start(t0);
+        m.start(t0);
+        c.stop(t0 + 0.45);
+        m.stop(t0 + 0.45);
+      });
+      this.showAudioTag("রিকশার টুংটাং · Rickshaw Bell");
+    }
+
+    playNetSplash(panVal = 0.35) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+      const src = this.ctx.createBufferSource();
+      src.buffer = this.whiteBuffer;
+      const filt = this.ctx.createBiquadFilter();
+      filt.type = "bandpass";
+      filt.frequency.setValueAtTime(1650, now);
+      filt.frequency.exponentialRampToValueAtTime(380, now + 0.65);
+      filt.Q.setValueAtTime(1.8, now);
+
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.linearRampToValueAtTime(0.22, now + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.72);
+
+      const panner = this.ctx.createStereoPanner();
+      panner.pan.setValueAtTime(panVal, now);
+
+      src.connect(filt);
+      filt.connect(g);
+      g.connect(panner);
+      panner.connect(this.compressor);
+      src.start(now);
+      src.stop(now + 0.75);
+      this.showAudioTag("খেপলা জাল · Cast Net Splash");
+    }
+
+    playOarCreak(panVal = 0.25) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const filt = this.ctx.createBiquadFilter();
+      const g = this.ctx.createGain();
+      const panner = this.ctx.createStereoPanner();
+
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(195, now);
+      osc.frequency.linearRampToValueAtTime(285, now + 0.14);
+      osc.frequency.linearRampToValueAtTime(170, now + 0.28);
+
+      filt.type = "bandpass";
+      filt.frequency.setValueAtTime(640, now);
+      filt.Q.setValueAtTime(5.0, now);
+
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.linearRampToValueAtTime(0.065, now + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+
+      panner.pan.setValueAtTime(panVal, now);
+      osc.connect(filt);
+      filt.connect(g);
+      g.connect(panner);
+      panner.connect(this.compressor);
+      osc.start(now);
+      osc.stop(now + 0.32);
+    }
+
+    // ========================================================================
+    // EXACT REFERENCE CODE TWO-TONE DIESEL AIR HORN (311.1 Hz & 370.0 Hz)
+    // Three detuned sawtooths per tone [-7, 0, 6], brassy 900Hz peak & vibrato
+    // ========================================================================
+    hornVoice(t0, gainLevel = 0.09, panVal = 0.0, doppler = 1.0) {
+      const ac = this.ctx;
+      const out = ac.createGain();
+      const lp = ac.createBiquadFilter();
+      const pk = ac.createBiquadFilter();
+      const panner = ac.createStereoPanner();
+      panner.pan.setValueAtTime(clamp(panVal, -0.95, 0.95), t0);
+
+      lp.type = "lowpass";
+      lp.frequency.value = 2400;
+      pk.type = "peaking";
+      pk.frequency.value = 900;
+      pk.gain.value = 6;
+
+      out.gain.setValueAtTime(0, t0);
+      out.gain.linearRampToValueAtTime(gainLevel, t0 + 0.07);
+
+      lp.connect(pk);
+      pk.connect(out);
+      out.connect(panner);
+      panner.connect(this.compressor);
+
+      const vib = ac.createOscillator();
+      const vg = ac.createGain();
+      const oscs = [vib];
+      vib.frequency.value = 5.5;
+      vg.gain.value = 2.5;
+      vib.connect(vg);
+
+      for (const f of HORN_TONES) {
+        for (const det of [-7, 0, 6]) {
+          const o = ac.createOscillator();
+          o.type = "sawtooth";
+          o.detune.value = det;
+          o.frequency.setValueAtTime(f * 0.94, t0);
+          o.frequency.exponentialRampToValueAtTime(f, t0 + 0.09);
+          if (doppler !== 1.0) {
+            o.frequency.exponentialRampToValueAtTime(f * doppler, t0 + 1.4);
+          }
+          vg.connect(o.frequency);
+          o.connect(lp);
+          oscs.push(o);
+        }
+      }
+      for (const o of oscs) o.start(t0);
+      return { out, oscs, gainLevel };
+    }
+
+    hornRelease(h, t) {
+      h.out.gain.setValueAtTime(h.gainLevel, t);
+      h.out.gain.linearRampToValueAtTime(0, t + 0.15);
+      for (const o of h.oscs) o.stop(t + 0.2);
+    }
+
+    hornBlast(t0, dur, gainLevel, panVal, doppler = 1.0) {
+      const h = this.hornVoice(t0, gainLevel, panVal, doppler);
+      this.hornRelease(h, t0 + Math.max(0.18, dur - 0.15));
+    }
+
+    playTrainHorn(short = false, panVal = 0.0, gainLevel = 0.09, doppler = 1.0) {
+      trainSim.hornWave = short ? 1.0 : 1.6;
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const t0 = this.ctx.currentTime + 0.02;
+      if (short) {
+        this.hornBlast(t0, 0.3, gainLevel, panVal, 1.0);
+        this.hornBlast(t0 + 0.42, 0.5, gainLevel, panVal, doppler);
+        this.showAudioTag("হুইসেল · Intercity Double Toot");
+      } else {
+        this.hornBlast(t0, 1.3, gainLevel, panVal, doppler);
+        this.showAudioTag("হুইসেল · Intercity Air Horn");
+      }
+    }
+
+    // ========================================================================
+    // EXACT REFERENCE CODE 4-AXLE RAIL JOINT CLICK (AXLES = [0, 8, 30, 38])
+    // Bandpass noise click (1700Hz, Q=1.6) + 95Hz->45Hz sleeper thump
+    // ========================================================================
+    playClick(t, strong, distScale = 1.0) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const ac = this.ctx;
+      const peak = (strong ? 0.32 : 0.22) * distScale;
+
+      const src = ac.createBufferSource();
+      const bp = ac.createBiquadFilter();
+      const g = ac.createGain();
+      src.buffer = this.whiteBuffer;
+      bp.type = "bandpass";
+      bp.frequency.value = 1700;
+      bp.Q.value = 1.6;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(peak, t + 0.003);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+      src.connect(bp);
+      bp.connect(g);
+      g.connect(this.trainPan);
+      src.start(t, Math.random() * 1.5, 0.16);
+
+      const o = ac.createOscillator();
+      const og = ac.createGain();
+      o.frequency.setValueAtTime(95, t);
+      o.frequency.exponentialRampToValueAtTime(45, t + 0.07);
+      og.gain.setValueAtTime(peak * 0.9, t);
+      og.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+      o.connect(og);
+      og.connect(this.trainPan);
+      o.start(t);
+      o.stop(t + 0.1);
+    }
+
+    playAirBrakeHiss(panVal = 0.2, vol = 0.09) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const ac = this.ctx;
+      const t = ac.currentTime + 0.01;
+      const dur = 0.65;
+      const src = ac.createBufferSource();
+      const f = ac.createBiquadFilter();
+      const g = ac.createGain();
+      src.buffer = this.whiteBuffer;
+      src.loop = true;
+      f.type = "highpass";
+      f.frequency.value = 2200;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(f);
+      f.connect(g);
+      g.connect(this.trainPan);
+      src.start(t, Math.random() * 1.2);
+      src.stop(t + dur + 0.05);
+      this.showAudioTag("ব্রেক · Pneumatic Air Release");
+    }
+
+    playBansuriNote(freq, dur = 2.4) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+
+      const osc1 = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      const vibrato = this.ctx.createOscillator();
+      const vibGain = this.ctx.createGain();
+
+      osc1.type = "sine";
+      osc2.type = "triangle";
+
+      osc1.frequency.setValueAtTime(freq * 0.97, now);
+      osc1.frequency.exponentialRampToValueAtTime(freq, now + 0.18);
+      osc2.frequency.setValueAtTime(freq * 2 * 0.97, now);
+      osc2.frequency.exponentialRampToValueAtTime(freq * 2, now + 0.18);
+
+      vibrato.frequency.setValueAtTime(5.2, now);
+      vibGain.gain.setValueAtTime(0.01, now);
+      vibGain.gain.linearRampToValueAtTime(freq * 0.012, now + dur * 0.45);
+      vibrato.connect(vibGain);
+      vibGain.connect(osc1.frequency);
+
+      const g1 = this.ctx.createGain();
+      const g2 = this.ctx.createGain();
+      g1.gain.setValueAtTime(0.0001, now);
+      g1.gain.linearRampToValueAtTime(0.22, now + 0.28);
+      g1.gain.setValueAtTime(0.18, now + dur * 0.65);
+      g1.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      g2.gain.setValueAtTime(0.0001, now);
+      g2.gain.linearRampToValueAtTime(0.045, now + 0.28);
+      g2.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      const breath = this.ctx.createBufferSource();
+      breath.buffer = this.whiteBuffer;
+      const bFilt = this.ctx.createBiquadFilter();
+      bFilt.type = "bandpass";
+      bFilt.frequency.setValueAtTime(freq * 3, now);
+      bFilt.Q.setValueAtTime(4.0, now);
+      const bGain = this.ctx.createGain();
+      bGain.gain.setValueAtTime(0.0001, now);
+      bGain.gain.linearRampToValueAtTime(0.018, now + 0.12);
+      bGain.gain.exponentialRampToValueAtTime(0.0001, now + dur * 0.8);
+
+      osc1.connect(g1);
+      osc2.connect(g2);
+      breath.connect(bFilt);
+      bFilt.connect(bGain);
+
+      g1.connect(this.musicGain);
+      g2.connect(this.musicGain);
+      bGain.connect(this.musicGain);
+
+      osc1.start(now);
+      osc2.start(now);
+      vibrato.start(now);
+      breath.start(now);
+      osc1.stop(now + dur + 0.05);
+      osc2.stop(now + dur + 0.05);
+      vibrato.stop(now + dur + 0.05);
+      breath.stop(now + dur + 0.05);
+    }
+
+    update(t, dt, state) {
+      if (!this.initialized || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+
+      for (const cue of TIMELINE_AUDIO_CUES) {
+        if (t >= cue.t && !this.firedCues.has(cue.id)) {
+          this.firedCues.add(cue.id);
+          cue.action(this);
+        }
+      }
+
+      if (t >= this.nextBirdTime && (t < 48 || t > 77)) {
+        const types = ["doel", "sparrow", "koel", "crow", "doel"];
+        const choice = types[Math.floor((t * 7.3) % types.length)];
+        const pan = Math.sin(t * 1.7) * 0.65;
+        this.playBird(choice, pan, t > 80 ? 0.09 : 0.12);
+        this.nextBirdTime = t + 3.4 + (t % 2.3);
+      }
+
+      const FLUTE_MELODY = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 440.00, 392.00, 329.63, 293.66];
+      if (t >= this.nextFluteTime) {
+        const note = FLUTE_MELODY[this.fluteNoteIdx % FLUTE_MELODY.length];
+        this.fluteNoteIdx++;
+        this.playBansuriNote(note, 2.9);
+        this.nextFluteTime = t + 3.1;
+      }
+
+      const trainDuck = (t >= 46 && t <= 78) ? 0.05 : (t > 80 ? 0.32 : 0.24);
+      this.musicGain.gain.setTargetAtTime(trainDuck, now, 0.25);
+
+      const gustFactor = state.windGust || 0;
+      const windLevel = 0.13 + 0.05 * Math.sin(t * 0.8) + gustFactor * 0.32;
+      const windFreq = 310 + 90 * Math.sin(t * 0.5) + gustFactor * 420;
+      this.windGain.gain.setTargetAtTime(windLevel, now, 0.08);
+      this.windFilter.frequency.setTargetAtTime(windFreq, now, 0.08);
+
+      const paddyLevel = (t < 45 || t > 80) ? (0.025 + 0.015 * Math.sin(t * 1.1)) : (0.04 + gustFactor * 0.07);
+      this.paddyGain.gain.setTargetAtTime(paddyLevel, now, 0.1);
+
+      const isRiverScene = (t >= 24 && t <= 45);
+      const waterVol = isRiverScene ? 0.14 : (t >= 45 && t < 80 ? 0.01 : 0.05);
+      this.waterGain.gain.setTargetAtTime(waterVol, now, 0.2);
+      this.waterFilter.frequency.setTargetAtTime(550 + 160 * Math.sin(t * 2.1), now, 0.1);
+      this.waterPan.pan.setTargetAtTime(isRiverScene ? 0.05 : 0.45, now, 0.2);
+
+      const cricketVol = t > 78 ? 0.022 : 0.005;
+      this.cricketGain.gain.setTargetAtTime(cricketVol, now, 0.3);
+
+      // ======================================================================
+      // EXACT REFERENCE CODE CONTINUOUS TRAIN BEDS & 4-AXLE RAIL JOINT CLICKS
+      // ======================================================================
+      let railHumAmt = 0.0001;
+      let trainEnv = 0.0;
+      let panVal = 0.0;
+      let rpm = 0.65;
+      let bridgeMix = 0.0;
+      let squealLvl = 0.0;
+
+      if (t < 25) {
+        // Scene 1: Aerial Intercity Train gliding along curved embankment
+        trainEnv = smoothstep(0, 2.0, t) * (1 - smoothstep(20, 25, t)) * 0.42;
+        panVal = lerp(0.25, -0.25, t / 25);
+        rpm = 0.62;
+      } else if (t >= 45 && t < 80) {
+        // Scene 3: Ground Cut — The Afternoon Express (Full Reference 2D Train Experience)
+        if (t < 49) {
+          railHumAmt = smoothstep(45, 48.5, t) * 0.045;
+        }
+        const envIn = smoothstep(45.5, 49.5, t);
+        const envOut = 1 - smoothstep(74.5, 79.8, t);
+        trainEnv = envIn * envOut * 1.05;
+        if (t < 50.5) {
+          panVal = lerp(-0.75, 0.0, clamp((t - 45.5) / 5.0, 0, 1));
+          rpm = 0.85;
+        } else if (t <= 71.0) {
+          panVal = Math.sin((t - 50.5) * 0.2) * 0.12;
+          rpm = (trainSim.hornWave > 0) ? 0.88 : 0.68;
+          bridgeMix = 0.18;
+        } else {
+          panVal = lerp(0.0, 0.85, clamp((t - 71.0) / 8.5, 0, 1));
+          rpm = 0.60;
+          squealLvl = 0.25 * (1 - clamp((t - 71.0) / 8.5, 0, 1));
+        }
+      } else if (t >= 80 && t < 94) {
+        // Scene 4: Sunset Golden Hour Intercity Train receding toward horizon
+        trainEnv = smoothstep(80, 81.5, t) * (1 - smoothstep(88, 94, t)) * 0.36;
+        panVal = lerp(0.25, 0.72, (t - 80) / 14);
+        rpm = 0.58;
+      }
+
+      const sp = clamp(trainSim.speed / 80, 0, 1.2) * trainEnv;
+      const set = (node, v) => node.gain.setTargetAtTime(Math.max(0.0001, v), now, 0.12);
+
+      set(this.railHumGain, railHumAmt);
+      set(this.rumble, sp * (0.18 + 0.12 * bridgeMix));
+      set(this.metal, sp * bridgeMix * 0.05);
+      set(this.boom, sp * bridgeMix * 0.32);
+
+      const f = 24 + rpm * 52;
+      this.engOsc.frequency.setTargetAtTime(f, now, 0.15);
+      this.engSub.frequency.setTargetAtTime(f / 2, now, 0.15);
+      this.engLfo.frequency.setTargetAtTime(f / 5, now, 0.15);
+      set(this.engine, trainEnv > 0.01 ? (0.06 + 0.11 * rpm) * trainEnv : 0.0001);
+      set(this.squeal, squealLvl * 0.018 * trainEnv);
+      this.trainPan.pan.setTargetAtTime(clamp(panVal, -0.95, 0.95), now, 0.1);
+
+      // Exact Reference Code trackSound(dt): 4 axles click over every JOINT_PX of travel
+      if (trainEnv > 0.04) {
+        const absSp = Math.abs(trainSim.speed);
+        trainSim.jointAcc += absSp * dt;
+        if (trainSim.jointAcc >= JOINT_PX) {
+          trainSim.jointAcc -= JOINT_PX;
+          if (absSp >= 3) {
+            for (let i = 0; i < AXLES.length; i++) {
+              this.playClick(now + 0.02 + AXLES[i] / absSp, i === 0 || i === 2, trainEnv);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  const TIMELINE_AUDIO_CUES = [
+    { id: "s1_koel",     t: 2.2,   action: (s) => s.playBird("koel", -0.35, 0.13) },
+    { id: "s1_horn",     t: 5.8,   action: (s) => s.playTrainHorn(true, 0.15, 0.055, 0.98) },
+    { id: "s1_doel",     t: 11.5,  action: (s) => s.playBird("doel", 0.3, 0.12) },
+    { id: "s1_horn2",    t: 15.2,  action: (s) => s.playTrainHorn(false, -0.05, 0.05, 0.96) },
+    { id: "s1_crow",     t: 18.0,  action: (s) => s.playBird("crow", -0.4, 0.10) },
+    { id: "s2_oar1",     t: 26.2,  action: (s) => s.playOarCreak(-0.1) },
+    { id: "s2_splash1",  t: 30.5,  action: (s) => s.playNetSplash(0.15) },
+    { id: "s2_oar2",     t: 33.0,  action: (s) => s.playOarCreak(0.25) },
+    { id: "s2_king",     t: 35.2,  action: (s) => s.playBird("sparrow", 0.35, 0.14) },
+    { id: "s2_splash2",  t: 38.0,  action: (s) => s.playNetSplash(0.35) },
+    { id: "s2_oar3",     t: 41.5,  action: (s) => s.playOarCreak(0.1) },
+    { id: "s3_horn_far", t: 46.8,  action: (s) => s.playTrainHorn(false, -0.55, 0.08, 0.99) },
+    { id: "s3_birds",    t: 47.3,  action: (s) => s.playBird("crow", -0.2, 0.15) },
+    { id: "s3_cow_alrt", t: 49.2,  action: (s) => s.playCowMoo(false, -0.55) },
+    { id: "s3_kids_wv",  t: 50.8,  action: (s) => s.playKidsLaughter(-0.45) },
+    { id: "s3_horn_mid", t: 51.8,  action: (s) => s.playTrainHorn(true, -0.1, 0.10, 0.98) },
+    { id: "s3_horn_sh",  t: 55.5,  action: (s) => s.playTrainHorn(true, 0.0, 0.11, 0.98) },
+    { id: "s3_air_hiss", t: 57.2,  action: (s) => s.playAirBrakeHiss(0.15, 0.09) },
+    { id: "s3_horn_dop", t: 61.5,  action: (s) => s.playTrainHorn(true, 0.05, 0.11, 0.97) },
+    { id: "s3_horn_end", t: 68.5,  action: (s) => s.playTrainHorn(false, 0.25, 0.10, 0.94) },
+    { id: "s4_horn_eve", t: 81.2,  action: (s) => s.playTrainHorn(true, 0.35, 0.05, 0.96) },
+    { id: "s4_koel",     t: 83.5,  action: (s) => s.playBird("koel", 0.25, 0.11) },
+    { id: "s4_cow_eve",  t: 87.0,  action: (s) => s.playCowMoo(false, -0.4) },
+    { id: "s4_doel_eve", t: 92.0,  action: (s) => s.playBird("doel", -0.15, 0.10) }
+  ];
+
+  // ============================================================================
+  // 3. HAND-PAINTED GOUACHE BOTANICAL CANOPY SPRITES & OFFSCREEN CACHES
+  // ============================================================================
+  function createOffscreen(w, h) {
+    const c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    return c;
+  }
+
+  // Multi-layered 5-tier gouache leaf cluster generator (from reference project)
+  function createPainterlyCanopySprite(w, h, seed, palette, leafStyle = "banyan") {
+    const c = createOffscreen(w, h);
+    const lctx = c.getContext("2d");
+    const cRng = mulberry32(seed);
+    const cx = w * 0.5;
+    const cy = h * 0.54;
+    const rx = w * 0.42;
+    const ry = h * 0.38;
+
+    for (let tier = 0; tier < palette.length; tier++) {
+      lctx.fillStyle = palette[tier];
+      const count = leafStyle === "mango" ? 105 : 120;
+      const tierYOffset = (2 - tier) * (h * 0.045);
+      const spread = 1.0 - tier * 0.08;
+
+      for (let i = 0; i < count; i++) {
+        const ang = cRng() * Math.PI * 2;
+        const dist = Math.pow(cRng(), 0.62) * spread;
+        const lx = cx + Math.cos(ang) * rx * dist + (cRng() - 0.5) * 14;
+        const ly = cy + Math.sin(ang) * ry * dist - tier * 5 + tierYOffset + (cRng() - 0.5) * 10;
+
+        lctx.save();
+        lctx.translate(lx, ly);
+        const leafAng = Math.atan2(ly - cy, lx - cx) * 0.5 + (cRng() - 0.5) * 0.7;
+        lctx.rotate(leafAng);
+
+        if (leafStyle === "mango") {
+          const lw = 11 + cRng() * 8;
+          const lh = 3.2 + cRng() * 2.2;
+          lctx.beginPath();
+          lctx.moveTo(-lw, 0);
+          lctx.quadraticCurveTo(0, -lh * 1.4, lw, 0);
+          lctx.quadraticCurveTo(0, lh * 1.4, -lw, 0);
+          lctx.fill();
+        } else {
+          const lw = 9 + cRng() * 9;
+          lctx.beginPath();
+          lctx.ellipse(0, 0, lw, 5.5 + cRng() * 4.5, 0, 0, Math.PI * 2);
+          lctx.fill();
+        }
+        lctx.restore();
+      }
+    }
+    return c;
+  }
+
+  const banyanCanopyA = createPainterlyCanopySprite(260, 190, 501, ["#112214", "#1a331d", "#254728", "#356134", "#527d43"], "banyan");
+  const banyanCanopyB = createPainterlyCanopySprite(240, 175, 502, ["#132516", "#1d3820", "#2a4d2c", "#3d6939", "#618c4c"], "banyan");
+  const mangoCanopySprite = createPainterlyCanopySprite(210, 165, 601, ["#142615", "#1f3b1e", "#2e5429", "#467335", "#7d6b38"], "mango");
+  const jackfruitCanopySprite = createPainterlyCanopySprite(220, 170, 701, ["#102112", "#19331b", "#244725", "#346131", "#4d7a3e"], "banyan");
+
+  const horizonCanvas = createOffscreen(WW, 260);
+  const aerialWorldCanvas = createOffscreen(WW, WH);
+  const groundStaticCanvas = createOffscreen(CW, CH);
+  const grainCanvas = createOffscreen(180, 180);
+
+  function preRenderAllLayers() {
+    renderGrainTexture();
+    renderHorizonCache();
+    renderAerialWorldLayer();
+    renderGroundStaticLayer();
+  }
+
+  function renderGrainTexture() {
+    const gctx = grainCanvas.getContext("2d");
+    const img = gctx.createImageData(180, 180);
+    const d = img.data;
+    const rng = mulberry32(1992);
+    for (let i = 0; i < d.length; i += 4) {
+      const v = (rng() * 255) | 0;
+      d[i] = v;
+      d[i + 1] = Math.max(0, v - 8);
+      d[i + 2] = Math.max(0, v - 22);
+      d[i + 3] = 14;
+    }
+    gctx.putImageData(img, 0, 0);
+  }
+
+  function renderHorizonCache() {
+    const hctx = horizonCanvas.getContext("2d");
+    const hRng = mulberry32(101);
+    for (let layer = 0; layer < 2; layer++) {
+      hctx.fillStyle = layer === 0 ? "#2e4c3e" : "#1f372b";
+      hctx.beginPath();
+      hctx.moveTo(0, 260);
+      for (let x = 0; x <= WW; x += 6) {
+        const n = fbm2D(x * 0.006 + layer * 10, layer * 5);
+        const dome = Math.abs(Math.sin(x * 0.014 + layer)) * 28 + Math.abs(Math.cos(x * 0.035)) * 9;
+        const y = 145 + layer * 18 - n * 44 - dome;
+        hctx.lineTo(x, y);
+      }
+      hctx.lineTo(WW, 260);
+      hctx.closePath();
+      hctx.fill();
+
+      if (layer === 1) {
+        // Distant lime-washed 3-dome village mosque on horizon
+        const mx = 520, my = 142;
+        hctx.fillStyle = "#d8d0c1";
+        hctx.fillRect(mx - 28, my, 56, 26);
+        hctx.beginPath();
+        hctx.arc(mx - 16, my, 8.5, Math.PI, 0);
+        hctx.arc(mx, my - 2, 12, Math.PI, 0);
+        hctx.arc(mx + 16, my, 8.5, Math.PI, 0);
+        hctx.fill();
+        hctx.fillRect(mx - 30, my - 14, 4, 40);
+        hctx.fillRect(mx + 26, my - 14, 4, 40);
+        hctx.fillStyle = "#24382d";
+        [-15, 0, 15].forEach(dx => {
+          hctx.beginPath();
+          hctx.arc(mx + dx, my + 14, 3.8, Math.PI, 0);
+          hctx.lineTo(mx + dx + 3.8, my + 26);
+          hctx.lineTo(mx + dx - 3.8, my + 26);
+          hctx.fill();
+        });
+      }
+
+      // Distant horizon palm silhouettes
+      for (let i = 0; i < 52; i++) {
+        const px = hRng() * WW;
+        const py = 118 + layer * 15 - hRng() * 26;
+        hctx.strokeStyle = layer === 0 ? "#284437" : "#182c22";
+        hctx.lineWidth = 2.0;
+        hctx.beginPath();
+        hctx.moveTo(px, py + 42);
+        hctx.quadraticCurveTo(px + (hRng() - 0.5) * 12, py + 16, px, py);
+        hctx.stroke();
+        for (let f = 0; f < 7; f++) {
+          const ang = -Math.PI * 1.1 + (f / 6) * Math.PI * 1.2;
+          hctx.beginPath();
+          hctx.moveTo(px, py);
+          hctx.quadraticCurveTo(px + Math.cos(ang) * 11, py + Math.sin(ang) * 6 - 3, px + Math.cos(ang) * 19, py + Math.sin(ang) * 11 + 4);
+          hctx.stroke();
+        }
+      }
+    }
+  }
+
+  // ============================================================================
+  // 4. PRE-RENDERED AERIAL HOMESTEAD, PADDY & RAILWAY WORLD (2400 x 1350)
+  // ============================================================================
+  function renderAerialWorldLayer() {
+    const ctx = aerialWorldCanvas.getContext("2d");
+    const rng = mulberry32(2026);
+
+    // 1. Base Lush Gouache Paddy Landscape (y: 195 to WH)
+    const landGrad = ctx.createLinearGradient(0, 195, 0, WH);
+    landGrad.addColorStop(0, "#557a38");
+    landGrad.addColorStop(0.28, "#68933e");
+    landGrad.addColorStop(0.58, "#8fa844");
+    landGrad.addColorStop(1, "#3f6129");
+    ctx.fillStyle = landGrad;
+    ctx.fillRect(0, 195, WW, WH - 195);
+
+    // 2. Patchwork Golden & Emerald Paddy Plots with Earthen Bunds ("Aal")
+    const paddyPalettes = ["#8aa63c", "#9ab046", "#6b933b", "#b5be48", "#5b8232", "#789c3b"];
+    for (let py = 215; py < 660; py += 44) {
+      for (let px = -20; px < 940; px += 148) {
+        const w = 138 + (rng() - 0.5) * 32;
+        const h = 40 + (rng() - 0.5) * 9;
+        ctx.fillStyle = paddyPalettes[(rng() * paddyPalettes.length) | 0];
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px + w, py + (rng() - 0.5) * 5);
+        ctx.lineTo(px + w - 12, py + h);
+        ctx.lineTo(px - 12, py + h);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "rgba(72, 86, 34, 0.58)";
+        ctx.lineWidth = 2.4;
+        ctx.stroke();
+      }
+    }
+
+    for (let py = 210; py < 880; py += 40) {
+      for (let px = 1620; px < WW + 60; px += 142) {
+        const w = 136 + (rng() - 0.5) * 28;
+        const h = 38 + (rng() - 0.5) * 8;
+        ctx.fillStyle = paddyPalettes[(rng() * paddyPalettes.length) | 0];
+        ctx.fillRect(px, py, w, h);
+        ctx.strokeStyle = "rgba(68, 82, 30, 0.52)";
+        ctx.lineWidth = 2.2;
+        ctx.strokeRect(px, py, w, h);
+      }
+    }
+
+    // Gouache brush texture strokes across all paddy fields
+    for (let i = 0; i < 2600; i++) {
+      const bx = rng() * WW;
+      const by = 210 + rng() * (WH - 210);
+      const len = 12 + rng() * 26;
+      ctx.strokeStyle = rng() > 0.48 ? "rgba(224, 210, 112, 0.24)" : "rgba(42, 68, 20, 0.20)";
+      ctx.lineWidth = 1.4 + rng() * 1.8;
+      ctx.beginPath();
+      ctx.moveTo(bx, by);
+      ctx.lineTo(bx + len, by + (rng() - 0.5) * 3);
+      ctx.stroke();
+    }
+
+    // 3. River Bend ("Nodi" on the right side) Base Mud Banks
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(1560, WH + 20);
+    ctx.quadraticCurveTo(1420, 860, 1780, 560);
+    ctx.quadraticCurveTo(2060, 410, WW + 40, 430);
+    ctx.lineTo(WW + 40, 560);
+    ctx.quadraticCurveTo(2120, 590, 2140, 820);
+    ctx.quadraticCurveTo(2160, 1080, 2360, WH + 20);
+    ctx.closePath();
+    ctx.lineWidth = 40;
+    ctx.strokeStyle = "#6e583f";
+    ctx.stroke();
+    ctx.lineWidth = 18;
+    ctx.strokeStyle = "#9c7e5a";
+    ctx.stroke();
+    ctx.restore();
+
+    // Far-right elevated green-gold paddy peninsula inside the river bend
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(WW + 20, 555);
+    ctx.quadraticCurveTo(2110, 610, 2135, 830);
+    ctx.quadraticCurveTo(2160, 1030, WW + 20, 1150);
+    ctx.closePath();
+    ctx.fillStyle = "#4d5934";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(WW + 20, 575);
+    ctx.quadraticCurveTo(2145, 625, 2165, 825);
+    ctx.quadraticCurveTo(2190, 1005, WW + 20, 1110);
+    ctx.closePath();
+    const penGrad = ctx.createLinearGradient(2140, 580, WW, 1050);
+    penGrad.addColorStop(0, "#b5be48");
+    penGrad.addColorStop(0.5, "#8fa844");
+    penGrad.addColorStop(1, "#557a38");
+    ctx.fillStyle = penGrad;
+    ctx.fill();
+    ctx.restore();
+
+    // 4. Warm Ochre-Sienna Swept Courtyard ("Uthan") & Earthen Path
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(200, 800);
+    ctx.quadraticCurveTo(620, 620, 960, 620);
+    ctx.quadraticCurveTo(1160, 480, 1360, 410);
+    ctx.lineTo(1430, 465);
+    ctx.quadraticCurveTo(1180, 680, 1040, 980);
+    ctx.quadraticCurveTo(880, 1220, 780, WH);
+    ctx.lineTo(160, WH);
+    ctx.closePath();
+    const uthanGrad = ctx.createLinearGradient(300, 520, 1150, 1150);
+    uthanGrad.addColorStop(0, "#c6a273");
+    uthanGrad.addColorStop(0.5, "#b89162");
+    uthanGrad.addColorStop(1, "#987348");
+    ctx.fillStyle = uthanGrad;
+    ctx.fill();
+
+    // Hand-swept broom arc textures on the courtyard (from reference project!)
+    ctx.strokeStyle = "rgba(120, 84, 48, 0.19)";
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 160; i++) {
+      const cx = 320 + rng() * 820;
+      const cy = 480 + rng() * 340;
+      const rad = 18 + rng() * 36;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, -0.4, 0.9);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 5. Lush Green Grazing Meadow in Lower-Left (for kite flyers & Zebu cattle)
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, 735);
+    ctx.quadraticCurveTo(460, 685, 865, 785);
+    ctx.quadraticCurveTo(960, 960, 830, WH);
+    ctx.lineTo(0, WH);
+    ctx.closePath();
+    const meadowGrad = ctx.createLinearGradient(100, 735, 780, WH);
+    meadowGrad.addColorStop(0, "#5e8534");
+    meadowGrad.addColorStop(0.5, "#4c702b");
+    meadowGrad.addColorStop(1, "#334f1b");
+    ctx.fillStyle = meadowGrad;
+    ctx.fill();
+
+    for (let i = 0; i < 480; i++) {
+      const gx = rng() * 880;
+      const gy = 740 + rng() * 590;
+      ctx.fillStyle = rng() > 0.35 ? "rgba(154, 176, 70, 0.32)" : "rgba(184, 145, 98, 0.22)";
+      ctx.beginPath();
+      ctx.ellipse(gx, gy, 8 + rng() * 18, 3 + rng() * 6, (rng() - 0.5) * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // 6. Curved Railway Embankment, Ballast, Sleepers & Steel Rails
+    ctx.save();
+    ctx.beginPath();
+    for (let i = 0; i <= 60; i++) {
+      const t = i / 60;
+      const p = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, t);
+      const w = lerp(190, 26, t);
+      if (i === 0) ctx.moveTo(p.x - w, p.y);
+      else ctx.lineTo(p.x - w, p.y);
+    }
+    for (let i = 60; i >= 0; i--) {
+      const t = i / 60;
+      const p = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, t);
+      const w = lerp(210, 28, t);
+      ctx.lineTo(p.x + w, p.y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = "#52702b";
+    ctx.fill();
+
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      for (let i = 0; i <= 60; i++) {
+        const t = i / 60;
+        const p = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, t);
+        const offset = side * lerp(108, 14, t);
+        if (i === 0) ctx.moveTo(p.x + offset, p.y);
+        else ctx.lineTo(p.x + offset, p.y);
+      }
+      ctx.strokeStyle = "rgba(198, 162, 115, 0.68)";
+      ctx.lineWidth = 10;
+      ctx.stroke();
+    }
+
+    ctx.beginPath();
+    for (let i = 0; i <= 60; i++) {
+      const t = i / 60;
+      const p = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, t);
+      const w = lerp(94, 11, t);
+      if (i === 0) ctx.moveTo(p.x - w, p.y);
+      else ctx.lineTo(p.x - w, p.y);
+    }
+    for (let i = 60; i >= 0; i--) {
+      const t = i / 60;
+      const p = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, t);
+      const w = lerp(94, 11, t);
+      ctx.lineTo(p.x + w, p.y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = "#696158";
+    ctx.fill();
+
+    for (let i = 0; i < 1600; i++) {
+      const t = Math.pow(rng(), 1.35);
+      const p = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, t);
+      const w = lerp(88, 10, t);
+      const ox = (rng() - 0.5) * 2 * w;
+      ctx.fillStyle = rng() > 0.5 ? "rgba(42,38,34,0.58)" : "rgba(175,164,150,0.45)";
+      ctx.fillRect(p.x + ox, p.y + (rng() - 0.5) * 6, 2.5, 2.5);
+    }
+
+    let sParam = 0.0;
+    while (sParam < 0.985) {
+      const p = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, sParam);
+      const d = quadBezierDeriv(TRACK_P0, TRACK_P1, TRACK_P2, sParam);
+      const len = Math.hypot(d.dx, d.dy) || 1;
+      const nx = -d.dy / len;
+      const ny = d.dx / len;
+      const halfW = lerp(64, 7.5, sParam);
+      const thick = lerp(7.5, 1.3, sParam);
+
+      ctx.strokeStyle = "#473b32";
+      ctx.lineWidth = thick;
+      ctx.beginPath();
+      ctx.moveTo(p.x - nx * halfW, p.y - ny * halfW);
+      ctx.lineTo(p.x + nx * halfW, p.y + ny * halfW);
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(195, 180, 162, 0.38)";
+      ctx.lineWidth = thick * 0.45;
+      ctx.beginPath();
+      ctx.moveTo(p.x - nx * halfW * 0.9, p.y - ny * halfW * 0.9 - 1);
+      ctx.lineTo(p.x + nx * halfW * 0.9, p.y + ny * halfW * 0.9 - 1);
+      ctx.stroke();
+
+      sParam += lerp(0.012, 0.0045, sParam);
+    }
+
+    for (const railSide of [-1, 1]) {
+      ctx.beginPath();
+      for (let i = 0; i <= 80; i++) {
+        const t = i / 80;
+        const p = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, t);
+        const d = quadBezierDeriv(TRACK_P0, TRACK_P1, TRACK_P2, t);
+        const len = Math.hypot(d.dx, d.dy) || 1;
+        const nx = -d.dy / len;
+        const ny = d.dx / len;
+        const gauge = lerp(42, 4.8, t) * railSide;
+        const rx = p.x + nx * gauge;
+        const ry = p.y + ny * gauge;
+        if (i === 0) ctx.moveTo(rx + 2, ry + 2);
+        else ctx.lineTo(rx + 2, ry + 2);
+      }
+      ctx.strokeStyle = "#2b241f";
+      ctx.lineWidth = 4.5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      for (let i = 0; i <= 80; i++) {
+        const t = i / 80;
+        const p = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, t);
+        const d = quadBezierDeriv(TRACK_P0, TRACK_P1, TRACK_P2, t);
+        const len = Math.hypot(d.dx, d.dy) || 1;
+        const nx = -d.dy / len;
+        const ny = d.dx / len;
+        const gauge = lerp(42, 4.8, t) * railSide;
+        const rx = p.x + nx * gauge;
+        const ry = p.y + ny * gauge;
+        if (i === 0) ctx.moveTo(rx, ry);
+        else ctx.lineTo(rx, ry);
+      }
+      ctx.strokeStyle = "#e2e8f0";
+      ctx.lineWidth = 2.6;
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 7. Woven Bamboo Fences ("Bera") with horizontal ties
+    function drawBambooFence(x1, y1, x2, y2, h = 38) {
+      const steps = Math.floor(Math.hypot(x2 - x1, y2 - y1) / 8);
+      for (let i = 0; i <= steps; i++) {
+        const u = i / steps;
+        const bx = lerp(x1, x2, u);
+        const by = lerp(y1, y2, u);
+        ctx.fillStyle = i % 2 === 0 ? "#a98c55" : "#967943";
+        ctx.fillRect(bx - 3, by - h, 5.5, h);
+        ctx.fillStyle = "#7c6132";
+        ctx.fillRect(bx - 4, by - h * 0.78, 8, 2.5);
+        ctx.fillRect(bx - 4, by - h * 0.38, 8, 2.5);
+      }
+    }
+    drawBambooFence(445, 708, 615, 635, 38);
+    drawBambooFence(655, 608, 760, 565, 36);
+    drawBambooFence(975, 520, 1085, 468, 34);
+
+    // 8. Detailed Bangladeshi Homestead Architecture (from Reference Code!)
+    function drawDetailedHomestead(hx, hy, scale, angle, rustSeed, hasVerandaDetails) {
+      ctx.save();
+      ctx.translate(hx, hy);
+      ctx.rotate(angle);
+      ctx.scale(scale, scale);
+
+      // Contact shadow
+      ctx.fillStyle = "rgba(22, 16, 10, 0.38)";
+      ctx.beginPath();
+      ctx.roundRect(-145, -45, 295, 130, 10);
+      ctx.fill();
+
+      // Raised earthen mud plinth (Bhiti) with steps
+      const bhitGrad = ctx.createLinearGradient(-135, 35, -135, 68);
+      bhitGrad.addColorStop(0, "#785436");
+      bhitGrad.addColorStop(1, "#543922");
+      ctx.fillStyle = bhitGrad;
+      ctx.beginPath();
+      ctx.moveTo(-132, 38);
+      ctx.lineTo(132, 38);
+      ctx.lineTo(140, 66);
+      ctx.lineTo(-140, 66);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#8c6543";
+      ctx.fillRect(-24, 46, 48, 10);
+      ctx.fillStyle = "#6c4b2e";
+      ctx.fillRect(-28, 56, 56, 10);
+
+      // Mud/Bamboo walls with horizontal texture lines
+      const wallGrad = ctx.createLinearGradient(-125, -42, -125, 40);
+      wallGrad.addColorStop(0, "#b58b60");
+      wallGrad.addColorStop(0.6, "#9e764c");
+      wallGrad.addColorStop(1, "#835e38");
+      ctx.fillStyle = wallGrad;
+      ctx.fillRect(-124, -40, 248, 78);
+
+      ctx.strokeStyle = "rgba(92, 62, 35, 0.28)";
+      ctx.lineWidth = 1.4;
+      for (let wy = -28; wy < 36; wy += 14) {
+        ctx.beginPath();
+        ctx.moveTo(-122, wy);
+        ctx.bezierCurveTo(-40, wy + 2, 40, wy - 2, 122, wy);
+        ctx.stroke();
+      }
+
+      // Wooden doorway & barred window
+      ctx.fillStyle = "#3d2817";
+      ctx.fillRect(-58, -16, 34, 54);
+      ctx.strokeStyle = "#614126";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-58, -16, 34, 54);
+
+      ctx.fillStyle = "#2c1e14";
+      ctx.fillRect(46, -12, 42, 32);
+      ctx.strokeStyle = "#5c3d24";
+      ctx.lineWidth = 2.2;
+      ctx.strokeRect(46, -12, 42, 32);
+
+      if (hasVerandaDetails) {
+        // Woven rice-storage basket (Duli / Gola)
+        ctx.fillStyle = "#9c7a44";
+        ctx.beginPath();
+        ctx.ellipse(-96, 18, 15, 20, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Shitalpati woven mat on veranda floor
+        ctx.fillStyle = "#d4b87a";
+        ctx.fillRect(-14, 33, 98, 6);
+        ctx.fillStyle = "#9e3b33";
+        ctx.fillRect(-14, 33, 98, 2);
+      }
+
+      // Carved wooden veranda pillars
+      ctx.fillStyle = "#4e341e";
+      [-118, -38, 38, 118].forEach(px => {
+        ctx.fillRect(px, -30, 6.5, 68);
+        ctx.fillRect(px - 2.5, -30, 11.5, 3.5);
+      });
+
+      // Gabled Corrugated Tin Roof (Chala) with authentic rust patches
+      const tinGrad = ctx.createLinearGradient(0, -86, 0, -24);
+      tinGrad.addColorStop(0, "#9fb0bd");
+      tinGrad.addColorStop(0.45, "#7b8a99");
+      tinGrad.addColorStop(0.8, "#8c745f");
+      tinGrad.addColorStop(1, "#5e6c7a");
+      ctx.fillStyle = tinGrad;
+      ctx.beginPath();
+      ctx.moveTo(-142, -24);
+      ctx.lineTo(-92, -84);
+      ctx.lineTo(92, -84);
+      ctx.lineTo(142, -24);
+      ctx.closePath();
+      ctx.fill();
+
+      const rRng = mulberry32(rustSeed);
+      for (let i = 0; i < 12; i++) {
+        const rx = (rRng() - 0.5) * 210;
+        const ry = -74 + rRng() * 44;
+        ctx.fillStyle = rRng() > 0.4 ? "rgba(138, 68, 42, 0.52)" : "rgba(108, 52, 34, 0.44)";
+        ctx.beginPath();
+        ctx.ellipse(rx, ry, 10 + rRng() * 16, 6 + rRng() * 9, rRng() * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Corrugated tin ribs
+      ctx.strokeStyle = "rgba(40, 50, 62, 0.35)";
+      ctx.lineWidth = 1.2;
+      for (let i = 0; i <= 32; i++) {
+        const u = i / 32;
+        ctx.beginPath();
+        ctx.moveTo(lerp(-92, 92, u), -84);
+        ctx.lineTo(lerp(-142, 142, u), -24);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = "#e2ebf2";
+      ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      ctx.moveTo(-92, -84);
+      ctx.lineTo(92, -84);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    drawDetailedHomestead(1180, 425, 0.62, -0.15, 101, false);
+    drawDetailedHomestead(855, 535, 0.88, -0.10, 202, true);
+    drawDetailedHomestead(340, 625, 0.96, -0.26, 303, true);
+
+    // Thatched Kitchen Hut (Rannaghor) & Haystack (Khorer Gada) + Earthen Clay Stove (Mati'r Chula)
+    ctx.save();
+    ctx.translate(715, 525);
+    const hayGrad = ctx.createRadialGradient(0, -18, 6, 0, -12, 42);
+    hayGrad.addColorStop(0, "#d8b25c");
+    hayGrad.addColorStop(1, "#9c7834");
+    ctx.fillStyle = hayGrad;
+    ctx.beginPath();
+    ctx.moveTo(-32, 22);
+    ctx.bezierCurveTo(-36, -48, 36, -48, 32, 22);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#5c4228";
+    ctx.fillRect(-2, -56, 4, 24);
+    ctx.restore();
+
+    // Clay stove (Chula) with firewood & rounded aluminum pot (Hari) at (885, 595)
+    ctx.save();
+    ctx.translate(885, 595);
+    ctx.fillStyle = "#8f6843";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 24, 11, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#3b2618";
+    ctx.beginPath();
+    ctx.ellipse(-6, -3, 8, 4.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    const potGrad = ctx.createRadialGradient(-8, -12, 2, -6, -9, 10);
+    potGrad.addColorStop(0, "#d0d7de");
+    potGrad.addColorStop(1, "#6e7781");
+    ctx.fillStyle = potGrad;
+    ctx.beginPath();
+    ctx.arc(-6, -9, 9.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Cast-Iron Hand Tubewell (Chapakol) at (615, 675)
+    ctx.save();
+    ctx.translate(615, 675);
+    ctx.fillStyle = "#7f8585";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 26, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#2e5945";
+    ctx.fillRect(-4, -38, 8, 38);
+    ctx.beginPath();
+    ctx.arc(0, -38, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#1e3d2f";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(2, -38);
+    ctx.lineTo(20, -20);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ============================================================================
+  // 5. PRE-RENDERED SCENE 4 GROUND-LEVEL STATIC LAYER (2D EMBANKMENT EDITION)
+  // ============================================================================
+  function renderGroundStaticLayer() {
+    const ctx = groundStaticCanvas.getContext("2d");
+    const rng = mulberry32(2026);
+
+    // 1. Warm Golden-Daylight Ghibli Sky
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, 520);
+    skyGrad.addColorStop(0, "#4f95b8");
+    skyGrad.addColorStop(0.54, "#95cadb");
+    skyGrad.addColorStop(1, "#f2ebd4");
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, CW, 520);
+
+    // Distant hazy horizon treeline across the paddy plain
+    ctx.fillStyle = "#3f6a58";
+    ctx.beginPath();
+    ctx.moveTo(0, 465);
+    for (let x = 0; x <= CW; x += 12) {
+      const dome = Math.abs(Math.sin(x * 0.015)) * 18 + Math.abs(Math.cos(x * 0.04)) * 7;
+      ctx.lineTo(x, 442 - dome);
+    }
+    ctx.lineTo(CW, 465);
+    ctx.closePath();
+    ctx.fill();
+
+    // Mid-distance golden-green Gram Bangla paddy fields behind the railway embankment
+    const paddyGrad = ctx.createLinearGradient(0, 440, 0, 560);
+    paddyGrad.addColorStop(0, "#6b933b");
+    paddyGrad.addColorStop(0.5, "#8fa844");
+    paddyGrad.addColorStop(1, "#557a38");
+    ctx.fillStyle = paddyGrad;
+    ctx.fillRect(0, 440, CW, 125);
+
+    // Paddy field bund lines ("Aal")
+    ctx.strokeStyle = "rgba(58, 78, 28, 0.55)";
+    ctx.lineWidth = 2;
+    for (let py = 458; py <= 520; py += 20) {
+      ctx.beginPath();
+      ctx.moveTo(0, py);
+      ctx.lineTo(CW, py);
+      ctx.stroke();
+    }
+
+    // Lush gouache Banyan, Mango & Jackfruit canopies behind the embankment
+    ctx.drawImage(banyanCanopyA, 420, 340, 230, 155);
+    ctx.drawImage(mangoCanopySprite, 620, 360, 195, 140);
+    ctx.drawImage(jackfruitCanopySprite, 810, 355, 205, 145);
+    ctx.drawImage(banyanCanopyB, 1140, 348, 225, 150);
+    ctx.drawImage(mangoCanopySprite, 1340, 365, 190, 135);
+
+    // 2. Earthen Railway Embankment Slope & Foreground Village Soil
+    const groundGrad = ctx.createLinearGradient(0, 545, 0, CH);
+    groundGrad.addColorStop(0, "#688c38");
+    groundGrad.addColorStop(0.18, "#8c6d46");
+    groundGrad.addColorStop(0.55, "#6e5032");
+    groundGrad.addColorStop(1, "#3b2818");
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, 545, CW, CH - 545);
+
+    for (let i = 0; i < 600; i++) {
+      const ex = rng() * CW;
+      const ey = lerp(585, CH, Math.pow(rng(), 0.75));
+      ctx.fillStyle = rng() > 0.5 ? "rgba(62, 42, 26, 0.5)" : "rgba(156, 122, 84, 0.32)";
+      ctx.beginPath();
+      ctx.ellipse(ex, ey, 6 + rng() * 18, 2.5 + rng() * 6, (rng() - 0.5) * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // ============================================================================
+  // 6. SCENE ENTITIES & MULTI-JOINTED ANATOMICAL CHARACTER RENDERER
+  // ============================================================================
+  const CLOUDS = Array.from({ length: 14 }, (_, i) => ({
+    x: (i / 14) * (WW + 400) - 200,
+    y: 48 + (i % 3) * 44,
+    w: 220 + (i % 4) * 55,
+    h: 54 + (i % 3) * 18,
+    speed: 9 + (i % 3) * 4,
+    seed: i * 17.3
+  }));
+
+  const AERIAL_PALMS = [
+    { x: 915,  y: 470, h: 215, lean: -24, type: "coconut", phase: 0.4, fronds: 11 },
+    { x: 1085, y: 430, h: 235, lean: -16, type: "coconut", phase: 1.2, fronds: 12 },
+    { x: 1185, y: 445, h: 220, lean: 22,  type: "coconut", phase: 2.1, fronds: 11 },
+    { x: 1320, y: 420, h: 205, lean: 28,  type: "coconut", phase: 3.0, fronds: 10 },
+    { x: 745,  y: 505, h: 210, lean: -18, type: "coconut", phase: 4.0, fronds: 11 },
+    { x: 285,  y: 560, h: 205, lean: -22, type: "coconut", phase: 5.2, fronds: 11 },
+    { x: 965,  y: 495, h: 185, lean: -6,  type: "betel",   phase: 0.9, fronds: 9 },
+    { x: 985,  y: 498, h: 195, lean: 4,   type: "betel",   phase: 1.7, fronds: 9 },
+    { x: 595,  y: 565, h: 185, lean: -8,  type: "betel",   phase: 2.6, fronds: 9 }
+  ];
+
+  const AERIAL_BANANAS = [
+    { x: 165, y: 815, scale: 1.32, phase: 0.0, hasMocha: true },
+    { x: 235, y: 745, scale: 1.18, phase: 1.4, hasMocha: false },
+    { x: 115, y: 655, scale: 1.25, phase: 2.1, hasMocha: true },
+    { x: 525, y: 595, scale: 1.22, phase: 0.8, hasMocha: true },
+    { x: 585, y: 560, scale: 1.10, phase: 2.7, hasMocha: false },
+    { x: 955, y: 480, scale: 1.05, phase: 3.5, hasMocha: true }
+  ];
+
+  const BAMBOO_STALKS = Array.from({ length: 18 }, (_, i) => ({
+    x: i < 10 ? 430 + (i - 5) * 9 : 660 + (i - 10) * 8,
+    y: i < 10 ? 485 : 460,
+    h: 175 + (i % 4) * 26,
+    lean: (i < 10 ? -18 : -12) + (i % 5 - 2) * 8,
+    phase: i * 0.45
+  }));
+
+  const KITE_KIDS = [
+    { id: 0, baseX: 540, baseY: 945, role: "childBoy",  shirt: "#e11d48", pants: "#1e3a8a", hasKite: true,  kiteColor1: "#fde047", kiteColor2: "#9333ea", kiteX: 590, kiteY: 805, phase: 0.0 },
+    { id: 1, baseX: 635, baseY: 895, role: "childGirl", shirt: "#e67e22", pants: "#f8c471", hasKite: true,  kiteColor1: "#f43f5e", kiteColor2: "#38bdf8", kiteX: 845, kiteY: 565, phase: 1.3 },
+    { id: 2, baseX: 770, baseY: 965, role: "boy",       shirt: "#f8f9fa", pants: "#1b3358", hasKite: true,  kiteColor1: "#e76f51", kiteColor2: "#f4d35e", kiteX: 980, kiteY: 650, phase: 2.5 },
+    { id: 3, baseX: 725, baseY: 970, role: "childBoy",  shirt: "#48c9b0", pants: "#2c3e50", hasKite: false, phase: 3.7 },
+    { id: 4, baseX: 805, baseY: 855, role: "childGirl", shirt: "#ec4899", pants: "#fde047", hasKite: false, phase: 4.9 }
+  ];
+
+  const CATTLE = [
+    { x: 355, y: 985,  scale: 1.35, topCol: "#c87b4b", midCol: "#a85a2e", botCol: "#7d3d1a", isCalf: false, dir: 1,  mooTimes: [29.0, 74.5, 112.0], phase: 0.4 },
+    { x: 670, y: 1080, scale: 1.42, topCol: "#e6caa4", midCol: "#cfa87a", botCol: "#9e794e", isCalf: false, dir: -1, mooTimes: [48.2], phase: 1.9 },
+    { x: 435, y: 1175, scale: 0.96, topCol: "#3a3f45", midCol: "#24282c", botCol: "#141619", isCalf: true,  dir: -1, mooTimes: [35.0], phase: 2.8 },
+    { x: 620, y: 1165, scale: 0.94, topCol: "#34383d", midCol: "#1e2022", botCol: "#111315", isCalf: true,  dir: 1,  mooTimes: [], phase: 4.1 }
+  ];
+
+  const RIVER_BOATS = [
+    { x: 1630, y: 965,  angle: 0.04,  scale: 1.12, type: "moored",    hasChhai: true,  phase: 0.2 },
+    { x: 1595, y: 895,  angle: -1.18, scale: 0.92, type: "moored",    hasChhai: false, phase: 1.4 },
+    { x: 1715, y: 645,  angle: -0.15, scale: 0.86, type: "moored",    hasChhai: true,  phase: 2.1 },
+    { x: 1815, y: 740,  angle: -0.25, scale: 1.02, type: "net_cast1", hasChhai: false, castStart: 28.0, phase: 0.8 },
+    { x: 2055, y: 910,  angle: 2.45,  scale: 1.08, type: "net_cast2", hasChhai: false, castStart: 35.5, phase: 3.0 },
+    { x: 2230, y: 1030, angle: 1.85,  scale: 0.98, type: "moored",    hasChhai: true,  phase: 4.2 },
+    { x: 2235, y: 530,  angle: 0.08,  scale: 0.72, type: "rowing",    hasChhai: true,  phase: 2.5 }
+  ];
+
+  const SHAPLAS = [
+    { x: 1585, y: 1020, size: 1.1, pink: true },
+    { x: 1625, y: 1065, size: 0.95, pink: true },
+    { x: 1670, y: 1040, size: 1.0, pink: false },
+    { x: 1690, y: 710,  size: 0.95, pink: true },
+    { x: 2150, y: 980,  size: 1.05, pink: true },
+    { x: 2180, y: 1015, size: 0.9, pink: false }
+  ];
+
+  const FIREFLIES = Array.from({ length: 55 }, (_, i) => ({
+    x: 180 + ((i * 173) % 2050),
+    y: 360 + ((i * 97) % 860),
+    phase: i * 0.7,
+    speedX: ((i % 5) - 2) * 8
+  }));
+
+  function drawDetailedTrunkAndBranches(wctx, x, y, trunkW, trunkH, sway) {
+    const barkGrad = wctx.createLinearGradient(x - trunkW, y - trunkH, x + trunkW, y);
+    barkGrad.addColorStop(0, "#59402b");
+    barkGrad.addColorStop(0.55, "#422e1d");
+    barkGrad.addColorStop(1, "#2b1d12");
+    wctx.fillStyle = barkGrad;
+    wctx.beginPath();
+    wctx.moveTo(x - trunkW * 1.35, y + 6);
+    wctx.quadraticCurveTo(x - trunkW * 0.7, y - trunkH * 0.5, x - trunkW * 0.55 + sway * 0.25, y - trunkH);
+    wctx.lineTo(x + trunkW * 0.55 + sway * 0.25, y - trunkH);
+    wctx.quadraticCurveTo(x + trunkW * 0.7, y - trunkH * 0.5, x + trunkW * 1.35, y + 6);
+    wctx.closePath();
+    wctx.fill();
+
+    wctx.strokeStyle = "#3d2a1b";
+    wctx.lineWidth = trunkW * 0.55;
+    wctx.lineCap = "round";
+    wctx.beginPath();
+    wctx.moveTo(x + sway * 0.2, y - trunkH * 0.85);
+    wctx.quadraticCurveTo(x - 28 + sway * 0.5, y - trunkH - 18, x - 52 + sway * 0.8, y - trunkH - 36);
+    wctx.moveTo(x + sway * 0.2, y - trunkH * 0.9);
+    wctx.quadraticCurveTo(x + 26 + sway * 0.5, y - trunkH - 16, x + 48 + sway * 0.8, y - trunkH - 34);
+    wctx.stroke();
+  }
+
+  // Multi-Jointed 6.5-Head Human Character Renderer (from Reference Project!)
+  function drawPerson(wctx, opts) {
+    const {
+      x, y, scale = 1.0, dir = 1, walkPhase = 0, isWalking = false,
+      isSitting = false, isRunning = false, breathe = 0, wind = 0.25,
+      role = "boy", shirtCol = null, pantsCol = null, armReach = 0, timeSec = 0
+    } = opts;
+
+    wctx.save();
+    wctx.translate(x, y);
+    const s = scale * 1.18;
+    wctx.scale(s * dir, s);
+
+    wctx.fillStyle = "rgba(15, 12, 8, 0.28)";
+    wctx.beginPath();
+    wctx.ellipse(0, 2, isSitting ? 14 : 11, 3.8, 0, 0, Math.PI * 2);
+    wctx.fill();
+
+    const skinBase = role === "farmer" ? "#7a4b2c" : role === "grandmother" ? "#916344" : "#8c5a3b";
+    const skinShadow = role === "farmer" ? "#5e381f" : "#6e4329";
+
+    const strideAmp = isRunning ? 0.68 : isWalking ? 0.42 : 0;
+    const stride = Math.sin(walkPhase) * strideAmp;
+    const oppStride = -stride;
+    const kneeBendA = isWalking || isRunning ? Math.max(0, Math.cos(walkPhase)) * (isRunning ? 0.65 : 0.35) : 0;
+    const kneeBendB = isWalking || isRunning ? Math.max(0, -Math.cos(walkPhase)) * (isRunning ? 0.65 : 0.35) : 0;
+    const bob = isWalking || isRunning ? Math.abs(Math.cos(walkPhase)) * (isRunning ? 3.2 : 1.5) : 0;
+    const leanForward = isRunning ? 0.14 : isWalking ? 0.04 : 0;
+
+    const hipY = (isSitting ? -6 : -19) - bob;
+    const shoulderY = (isSitting ? -24 : -36) - bob + breathe * 0.7;
+
+    wctx.rotate(leanForward);
+
+    function drawLeg(hipX, thighAng, kneeFlex, isBack) {
+      const thighLen = 9.5;
+      const calfLen = 9.5;
+      const kx = hipX + Math.sin(thighAng) * thighLen;
+      const ky = hipY + Math.cos(thighAng) * thighLen;
+      const totalCalfAng = thighAng - kneeFlex;
+      const ax = kx + Math.sin(totalCalfAng) * calfLen;
+      const ay = ky + Math.cos(totalCalfAng) * calfLen;
+
+      wctx.strokeStyle = isBack ? skinShadow : skinBase;
+      wctx.lineWidth = 3.6;
+      wctx.lineCap = "round";
+      wctx.lineJoin = "round";
+      wctx.beginPath();
+      wctx.moveTo(hipX, hipY);
+      wctx.lineTo(kx, ky);
+      wctx.lineTo(ax, ay);
+      wctx.stroke();
+
+      wctx.fillStyle = isBack ? skinShadow : skinBase;
+      wctx.beginPath();
+      wctx.ellipse(ax + 2.2, ay + 0.5, 4.2, 1.8, -totalCalfAng * 0.3, 0, Math.PI * 2);
+      wctx.fill();
+    }
+
+    function drawArm(shX, shY, upperAng, elbowFlex, isBack, sleeveCol) {
+      const upperLen = 8.0;
+      const foreLen = 7.8;
+      const ex = shX + Math.sin(upperAng) * upperLen;
+      const ey = shY + Math.cos(upperAng) * upperLen;
+      const foreAng = upperAng + elbowFlex;
+      const wx = ex + Math.sin(foreAng) * foreLen;
+      const wy = ey + Math.cos(foreAng) * foreLen;
+
+      if (sleeveCol) {
+        wctx.strokeStyle = sleeveCol;
+        wctx.lineWidth = 4.2;
+        wctx.beginPath();
+        wctx.moveTo(shX, shY);
+        wctx.lineTo(lerp(shX, ex, 0.75), lerp(shY, ey, 0.75));
+        wctx.stroke();
+      }
+
+      wctx.strokeStyle = isBack ? skinShadow : skinBase;
+      wctx.lineWidth = 3.0;
+      wctx.lineCap = "round";
+      wctx.lineJoin = "round";
+      wctx.beginPath();
+      wctx.moveTo(sleeveCol ? lerp(shX, ex, 0.65) : shX, sleeveCol ? lerp(shY, ey, 0.65) : shY);
+      wctx.lineTo(ex, ey);
+      wctx.lineTo(wx, wy);
+      wctx.stroke();
+
+      wctx.fillStyle = isBack ? skinShadow : skinBase;
+      wctx.beginPath();
+      wctx.ellipse(wx + Math.sin(foreAng) * 1.5, wy + Math.cos(foreAng) * 1.5, 2.2, 1.6, -foreAng, 0, Math.PI * 2);
+      wctx.fill();
+
+      return { wx, wy, foreAng };
+    }
+
+    const windSway = wind * -7.5 * dir;
+    const sleeveColor = shirtCol || (role === "boy" ? "#f8f9fa" : role === "mother" ? "#a93226" : role === "grandmother" ? "#f2ece1" : role === "childGirl" ? "#e67e22" : role === "childBoy" ? "#48c9b0" : null);
+
+    const backArmAng = armReach !== 0 ? armReach * 0.6 : stride * 0.75;
+    drawArm(-1.5, shoulderY + 2, backArmAng, 0.35, true, sleeveColor);
+
+    if (isSitting) {
+      wctx.fillStyle = role === "grandmother" ? "#f2ece1" : "#e6d7c3";
+      wctx.beginPath();
+      wctx.moveTo(-8, shoulderY + 10);
+      wctx.quadraticCurveTo(14, hipY - 5, 13, 1);
+      wctx.lineTo(-9, 1);
+      wctx.closePath();
+      wctx.fill();
+      wctx.fillStyle = role === "grandmother" ? "#8c6d46" : "#c0392b";
+      wctx.fillRect(-9, -2.5, 22, 3);
+    } else {
+      drawLeg(-1.5, oppStride, kneeBendB, true);
+      drawLeg(1.5, stride, kneeBendA, false);
+
+      if (role === "mother") {
+        wctx.fillStyle = "#e8d8c5";
+        wctx.beginPath();
+        wctx.moveTo(-6.5, hipY - 2);
+        wctx.lineTo(6.5, hipY - 2);
+        wctx.lineTo(8.5 + windSway * 0.45 + Math.sin(walkPhase) * 3, -2.5);
+        wctx.lineTo(-7.5 + windSway * 0.45 - Math.sin(walkPhase) * 2, -2.5);
+        wctx.closePath();
+        wctx.fill();
+        wctx.fillStyle = "#b82921";
+        wctx.fillRect(-7.5 + windSway * 0.45, -5.5, 16, 3.2);
+      } else if (role === "farmer") {
+        const lungiBot = -5 - bob;
+        wctx.fillStyle = pantsCol || "#24593f";
+        wctx.beginPath();
+        wctx.moveTo(-6.5, hipY - 2);
+        wctx.lineTo(6.5, hipY - 2);
+        wctx.lineTo(7.8 + windSway * 0.35, lungiBot);
+        wctx.lineTo(-7.5 + windSway * 0.35, lungiBot);
+        wctx.closePath();
+        wctx.fill();
+      } else if (role === "childGirl") {
+        wctx.fillStyle = shirtCol || "#e67e22";
+        wctx.beginPath();
+        wctx.moveTo(-5.5, hipY - 3);
+        wctx.lineTo(5.5, hipY - 3);
+        wctx.lineTo(9 + windSway * 0.3, -9 - bob);
+        wctx.lineTo(-9 + windSway * 0.3, -9 - bob);
+        wctx.closePath();
+        wctx.fill();
+        wctx.fillStyle = pantsCol || "#f8c471";
+        wctx.fillRect(-8.5 + windSway * 0.3, -11 - bob, 17, 2);
+      } else {
+        wctx.fillStyle = pantsCol || "#1b3358";
+        wctx.beginPath();
+        wctx.moveTo(-6, hipY - 2);
+        wctx.lineTo(6, hipY - 2);
+        wctx.lineTo(6.5 + Math.sin(stride) * 3, -10 - bob);
+        wctx.lineTo(-6.5 + Math.sin(oppStride) * 3, -10 - bob);
+        wctx.closePath();
+        wctx.fill();
+      }
+    }
+
+    if (role === "mother") {
+      wctx.fillStyle = "#a93226";
+      wctx.fillRect(-6, shoulderY, 12, hipY - shoulderY);
+      wctx.fillStyle = "#e8d8c5";
+      wctx.beginPath();
+      wctx.moveTo(-6, shoulderY);
+      wctx.lineTo(2, shoulderY);
+      wctx.lineTo(6, hipY);
+      wctx.lineTo(-4, hipY);
+      wctx.closePath();
+      wctx.fill();
+      const anchalWave = windSway * 1.45 + Math.sin(walkPhase * 1.3 + timeSec * 2) * 3.5;
+      wctx.fillStyle = "#e8d8c5";
+      wctx.beginPath();
+      wctx.moveTo(-5, shoulderY + 1);
+      wctx.quadraticCurveTo(-15 + anchalWave, shoulderY + 7, -21 + anchalWave * 1.25, shoulderY + 18);
+      wctx.lineTo(-12 + anchalWave, shoulderY + 21);
+      wctx.closePath();
+      wctx.fill();
+      wctx.fillStyle = "#b82921";
+      wctx.fillRect(-19 + anchalWave, shoulderY + 15, 7, 4);
+    } else if (role === "grandmother") {
+      wctx.fillStyle = "#f2ece1";
+      wctx.beginPath();
+      wctx.roundRect(-7, shoulderY - 1, 14, hipY - shoulderY + 4, 4);
+      wctx.fill();
+    } else if (role === "farmer") {
+      wctx.fillStyle = skinBase;
+      wctx.fillRect(-6, shoulderY, 12, hipY - shoulderY);
+      wctx.fillStyle = "#c0392b";
+      wctx.fillRect(-6.8, shoulderY - 1, 13.6, 6);
+    } else {
+      wctx.fillStyle = shirtCol || (role === "boy" ? "#f8f9fa" : "#48c9b0");
+      wctx.beginPath();
+      wctx.roundRect(-5.8, shoulderY, 11.6, hipY - shoulderY + 2, 3);
+      wctx.fill();
+    }
+
+    wctx.fillStyle = skinShadow;
+    wctx.fillRect(-2, shoulderY - 4, 4, 5);
+
+    const headY = shoulderY - 9.5;
+    wctx.fillStyle = skinBase;
+    wctx.beginPath();
+    wctx.arc(0, headY, 5.8, 0, Math.PI * 2);
+    wctx.fill();
+    wctx.beginPath();
+    wctx.moveTo(4.5, headY - 2.5);
+    wctx.lineTo(6.8, headY + 0.2);
+    wctx.lineTo(5.0, headY + 1.5);
+    wctx.closePath();
+    wctx.fill();
+
+    const isBlinking = Math.sin(timeSec * 3.1 + x * 0.1) > 0.96;
+    if (!isBlinking) {
+      wctx.fillStyle = "#14100e";
+      wctx.beginPath();
+      wctx.arc(3.4, headY - 0.9, 0.95, 0, Math.PI * 2);
+      wctx.fill();
+    }
+
+    if (role === "mother") {
+      wctx.fillStyle = "#171311";
+      wctx.beginPath();
+      wctx.arc(-0.8, headY - 1.2, 6.0, Math.PI * 0.78, Math.PI * 2.08);
+      wctx.arc(-7.4, headY + 0.5, 3.8, 0, Math.PI * 2);
+      wctx.fill();
+    } else if (role === "grandmother") {
+      wctx.fillStyle = "#f2ece1";
+      wctx.beginPath();
+      wctx.arc(-1.2, headY - 0.5, 6.4, Math.PI * 0.65, Math.PI * 1.95);
+      wctx.fill();
+    } else if (role === "childGirl") {
+      wctx.fillStyle = "#171311";
+      wctx.beginPath();
+      wctx.arc(-0.6, headY - 1.2, 6.0, Math.PI * 0.78, Math.PI * 2.1);
+      wctx.fill();
+      wctx.strokeStyle = "#171311";
+      wctx.lineWidth = 2.4;
+      wctx.beginPath();
+      wctx.moveTo(-5.5, headY + 1);
+      wctx.quadraticCurveTo(-10 + windSway * 0.4, headY + 4, -12 + windSway * 0.7, headY + 8);
+      wctx.stroke();
+      wctx.fillStyle = "#e74c3c";
+      wctx.beginPath();
+      wctx.arc(-12 + windSway * 0.7, headY + 8, 1.8, 0, Math.PI * 2);
+      wctx.fill();
+    } else {
+      wctx.fillStyle = "#171311";
+      wctx.beginPath();
+      wctx.arc(-0.6, headY - 1.4, 6.0, Math.PI * 0.82, Math.PI * 2.12);
+      wctx.fill();
+    }
+
+    if (role === "farmer" && !isSitting) {
+      const mGrad = wctx.createLinearGradient(-13, headY - 13, 13, headY - 3);
+      mGrad.addColorStop(0, "#d8b467");
+      mGrad.addColorStop(1, "#9c7834");
+      wctx.fillStyle = mGrad;
+      wctx.beginPath();
+      wctx.moveTo(-13.5, headY - 3);
+      wctx.quadraticCurveTo(0, headY - 14.5, 13.5, headY - 3);
+      wctx.closePath();
+      wctx.fill();
+    }
+
+    const frontArmAng = armReach !== 0 ? armReach : -stride * 0.85;
+    const frontElbow = armReach !== 0 ? -0.45 : 0.42;
+    drawArm(1.5, shoulderY + 2, frontArmAng, frontElbow, false, sleeveColor);
+
+    wctx.restore();
+  }
+
+  // ============================================================================
+  // 7. VIRTUAL CAMERA & SCENE TRANSITION CONTROLLER
+  // ============================================================================
+  function getCameraState(t) {
+    let mode = "aerial";
+    let cx = WW * 0.5;
+    let cy = WH * 0.5;
+    let zoom = 1.0;
+
+    if (t < 25) {
+      // Scene 1: Aerial Drone Glide over golden paddy fields
+      const p = easeInOutCubic(t / 25);
+      cx = lerp(WW * 0.50, WW * 0.45, p);
+      cy = lerp(WH * 0.46, WH * 0.55, p);
+      zoom = lerp(1.02, 1.38, p);
+    } else if (t < 45) {
+      // Scene 2: Direct glide from drone shot across paddy to river bend & cast nets
+      const p = easeInOutCubic(clamp((t - 25) / 6.5, 0, 1));
+      const drift = clamp((t - 31.5) / 13.5, 0, 1);
+      cx = lerp(WW * 0.45, 1890, p) + drift * 75;
+      cy = lerp(WH * 0.55, 815, p) - drift * 40;
+      zoom = lerp(1.38, 2.05, p) + drift * 0.15;
+    } else if (t < 80) {
+      // Scene 3: Ground Cut — The Afternoon Express
+      mode = "ground";
+      const shakeAmt = (t >= 53.5 && t <= 76.0)
+        ? (Math.sin(t * 62) * 2.2 + Math.cos(t * 37) * 1.4) * smoothstep(52.5, 55.5, t) * (1 - smoothstep(73, 77, t))
+        : 0;
+      cx = CW * 0.5 + Math.sin(t * 0.9) * 4 + shakeAmt;
+      cy = CH * 0.5 + Math.cos(t * 1.1) * 3 + Math.abs(shakeAmt) * 0.75;
+      zoom = 1.02 + (t >= 53.5 && t <= 76.0 ? 0.025 : 0);
+    } else {
+      // Scene 4: Golden Hour Sunset & Calm Return
+      const p = easeInOutCubic((t - 80) / 20);
+      cx = lerp(1380, WW * 0.50, p);
+      cy = lerp(580, WH * 0.50, p);
+      zoom = lerp(1.52, 1.00, p);
+    }
+
+    if (mode === "aerial") {
+      const halfW = (CW * 0.5) / zoom;
+      const halfH = (CH * 0.5) / zoom;
+      cx = clamp(cx, halfW, WW - halfW);
+      cy = clamp(cy, halfH, WH - halfH);
+    }
+
+    let cutFade = 0;
+    if (Math.abs(t - 45.0) < 0.45) {
+      cutFade = 1 - Math.abs(t - 45.0) / 0.45;
+    } else if (Math.abs(t - 80.0) < 0.55) {
+      cutFade = 1 - Math.abs(t - 80.0) / 0.55;
+    }
+
+    return { mode, cx, cy, zoom, cutFade };
+  }
+
+  // ============================================================================
+  // 8. AERIAL SCENE DYNAMIC RENDERING (Scenes 1, 2, 3, 5)
+  // ============================================================================
+  function renderAerialScene(ctx, t, cam, atm) {
+    const { pal, wind } = atm;
+    ctx.save();
+    ctx.translate(CW * 0.5, CH * 0.5);
+    ctx.scale(cam.zoom, cam.zoom);
+    ctx.translate(-cam.cx, -cam.cy);
+
+    // 1. Base Pre-rendered Paddy, Courtyard, Homesteads & Track
+    ctx.drawImage(aerialWorldCanvas, 0, 0);
+
+    // 2. Dynamic Time-of-Day Gouache Sky, Sun Halo, Clouds & Distant Mosque Horizon
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, 250);
+    skyGrad.addColorStop(0, `rgb(${pal.skyTop.map(Math.round).join(",")})`);
+    skyGrad.addColorStop(0.55, `rgb(${pal.skyMid.map(Math.round).join(",")})`);
+    skyGrad.addColorStop(1, `rgb(${pal.skyHor.map(Math.round).join(",")})`);
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, WW, 235);
+
+    // Sun disc & warm halo
+    const sunX = lerp(420, 1880, clamp(t / 100, 0, 1));
+    const sunY = t < 45 ? lerp(175, 75, t / 45) : lerp(75, 195, (t - 45) / 55);
+    const sunHalo = ctx.createRadialGradient(sunX, sunY, 10, sunX, sunY, 220);
+    sunHalo.addColorStop(0, "rgba(255, 246, 210, 0.92)");
+    sunHalo.addColorStop(0.3, "rgba(255, 198, 112, 0.45)");
+    sunHalo.addColorStop(1, "rgba(255, 165, 90, 0)");
+    ctx.fillStyle = sunHalo;
+    ctx.beginPath();
+    ctx.arc(sunX, sunY, 220, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Multi-layered Painterly Clouds
+    ctx.save();
+    for (const c of CLOUDS) {
+      const cx = ((c.x + t * c.speed) % (WW + 420)) - 210;
+      const cy = c.y + Math.sin(t * 0.25 + c.seed) * 4;
+      const topCol = lerpColor(pal.skyHor, [255, 250, 240], 0.65);
+      const botCol = lerpColor(pal.skyMid, [78, 96, 112], 0.35);
+      const cGrad = ctx.createLinearGradient(cx, cy - c.h * 0.5, cx, cy + c.h * 0.5);
+      cGrad.addColorStop(0, topCol);
+      cGrad.addColorStop(1, botCol);
+      ctx.fillStyle = cGrad;
+      ctx.globalAlpha = 0.78;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, c.w * 0.5, c.h * 0.38, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx - c.w * 0.24, cy + 6, c.w * 0.34, c.h * 0.3, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx + c.w * 0.26, cy + 5, c.w * 0.36, c.h * 0.32, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Distant Horizon Tree Line & Mosque with atmospheric glaze
+    ctx.drawImage(horizonCanvas, 0, 0);
+    ctx.fillStyle = lerpRgba(pal.skyHor, pal.skyMid, 0.3, 0.28);
+    ctx.fillRect(0, 80, WW, 180);
+
+    // 3. Paddy Wind Shimmer, Golden Grain Heads & Kashful Flowers
+    drawPaddyWindAndKashful(ctx, t, atm);
+
+    // 4. Drifting Cloud Shadows
+    drawCloudShadows(ctx, t);
+
+    // 5. Dynamic Color-Graded River, Shapla Lilies, Boats & Cast Nets
+    drawRiverLife(ctx, t, atm);
+
+    // 6. Gouache Background Trees (Banyan, Mango, Jackfruit, Bamboo) & Homestead Activities
+    drawVillageLife(ctx, t, atm);
+
+    // 7. True Pinnate Palms, Banana Plants with Mocha, Kitchen Smoke & Fireflies
+    drawSwayingFoliageAndSmoke(ctx, t, atm);
+
+    // 8. Realistic 3D-Articulated Aerial Train on Curved Track (Scene 1 & Scene 5)
+    if (t < 26) {
+      const trainPos = lerp(0.62, 0.08, t / 26);
+      drawAerialTrain(ctx, trainPos, t, -1, atm);
+    } else if (t >= 80 && t < 94) {
+      const trainPos = lerp(0.56, 0.96, (t - 80) / 14);
+      drawAerialTrain(ctx, trainPos, t, 1, atm);
+    }
+
+    // 9. Egrets, Doel & Kingfisher
+    drawAerialBirds(ctx, t);
+
+    ctx.restore();
+  }
+
+  function drawPaddyWindAndKashful(ctx, t, atm) {
+    const { wind } = atm;
+    ctx.save();
+    for (let wBand = 0; wBand < 6; wBand++) {
+      const bandX = ((wBand * 185 + t * (54 + wind * 90)) % 920) - 60;
+      const bandGrad = ctx.createLinearGradient(bandX, 240, bandX + 110, 560);
+      bandGrad.addColorStop(0, "rgba(224, 210, 112, 0)");
+      bandGrad.addColorStop(0.5, "rgba(232, 218, 120, 0.18)");
+      bandGrad.addColorStop(1, "rgba(224, 210, 112, 0)");
+      ctx.fillStyle = bandGrad;
+      ctx.fillRect(bandX, 225, 110, 380);
+    }
+    for (let wBand = 0; wBand < 5; wBand++) {
+      const bandX = 1650 + ((wBand * 165 + t * (58 + wind * 85)) % 740);
+      const bandGrad = ctx.createLinearGradient(bandX, 240, bandX + 105, 520);
+      bandGrad.addColorStop(0, "rgba(224, 210, 112, 0)");
+      bandGrad.addColorStop(0.5, "rgba(232, 218, 120, 0.18)");
+      bandGrad.addColorStop(1, "rgba(224, 210, 112, 0)");
+      ctx.fillStyle = bandGrad;
+      ctx.fillRect(bandX, 220, 105, 320);
+    }
+
+    for (let i = 0; i < 28; i++) {
+      const kx = lerp(1465, 1840, i / 28) + Math.sin(i * 2.1) * 14;
+      const ky = lerp(1180, 540, i / 28);
+      const sway = sampleWind(kx, ky, t, wind) * 22;
+      ctx.strokeStyle = "#5f7842";
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(kx, ky + 12);
+      ctx.quadraticCurveTo(kx + sway * 0.4, ky, kx + sway, ky - 13);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(250, 248, 242, 0.90)";
+      ctx.beginPath();
+      ctx.ellipse(kx + sway, ky - 15, 6.2, 2.8, 0.25, 0, Math.PI * 2);
+      ctx.ellipse(kx + sway * 0.85 + 2.5, ky - 11, 4.8, 2.1, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawCloudShadows(ctx, t) {
+    ctx.save();
+    const shadows = [
+      { baseX: 250, y: 380, rx: 280, ry: 95 },
+      { baseX: 1150, y: 690, rx: 340, ry: 115 },
+      { baseX: 1850, y: 420, rx: 290, ry: 90 }
+    ];
+    shadows.forEach((s, idx) => {
+      const sx = (s.baseX + t * (22 + idx * 4)) % (WW + 500) - 250;
+      const grad = ctx.createRadialGradient(sx, s.y, s.rx * 0.1, sx, s.y, s.rx);
+      grad.addColorStop(0, "rgba(18, 28, 18, 0.18)");
+      grad.addColorStop(0.65, "rgba(18, 28, 18, 0.09)");
+      grad.addColorStop(1, "rgba(18, 28, 18, 0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.ellipse(sx, s.y, s.rx, s.ry, -0.12, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  function drawRiverLife(ctx, t, atm) {
+    const { pal, wind } = atm;
+    ctx.save();
+
+    ctx.beginPath();
+    ctx.moveTo(1560, WH + 20);
+    ctx.quadraticCurveTo(1420, 860, 1780, 560);
+    ctx.quadraticCurveTo(2060, 410, WW + 40, 430);
+    ctx.lineTo(WW + 40, 560);
+    ctx.quadraticCurveTo(2120, 590, 2140, 820);
+    ctx.quadraticCurveTo(2160, 1080, 2360, WH + 20);
+    ctx.closePath();
+
+    const rivGrad = ctx.createLinearGradient(1450, 440, 2250, WH);
+    rivGrad.addColorStop(0, `rgb(${pal.waterTop.map(Math.round).join(",")})`);
+    rivGrad.addColorStop(0.65, `rgb(${pal.waterBot.map(Math.round).join(",")})`);
+    rivGrad.addColorStop(1, "#182c25");
+    ctx.fillStyle = rivGrad;
+    ctx.fill();
+
+    ctx.strokeStyle = lerpRgba(pal.skyHor, [255, 255, 255], 0.4, 0.28);
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 44; i++) {
+      const rx = 1560 + ((i * 73) % 720);
+      const ry = 510 + ((i * 59) % 780);
+      if (rx > 2110 && ry > 555 && ry < 1120) continue;
+      const w = 16 + 10 * Math.sin(t * 2.4 + i);
+      ctx.beginPath();
+      ctx.moveTo(rx - w, ry + Math.sin(t * 1.8 + i) * 2);
+      ctx.lineTo(rx + w, ry + Math.sin(t * 1.8 + i) * 2);
+      ctx.stroke();
+    }
+
+    for (const sh of SHAPLAS) {
+      const bob = Math.sin(t * 1.6 + sh.x * 0.05) * 2.2;
+      const sx = sh.x + bob;
+      const sy = sh.y + bob * 0.4;
+      ctx.fillStyle = "#2e5930";
+      ctx.beginPath();
+      ctx.ellipse(sx - 6, sy + 3, 14 * sh.size, 5.5 * sh.size, 0, 0.2, Math.PI * 1.9);
+      ctx.fill();
+      ctx.fillStyle = sh.pink ? "#e85d88" : "#f7f4ea";
+      for (let p = -2; p <= 2; p++) {
+        ctx.beginPath();
+        ctx.ellipse(sx + p * 3 * sh.size, sy - 3 * sh.size, 2.5 * sh.size, 6.2 * sh.size, p * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = "#f4d03f";
+      ctx.beginPath();
+      ctx.arc(sx, sy - 2, 2.2 * sh.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    RIVER_BOATS.forEach((b) => {
+      const bobY = Math.sin(t * 2.2 + b.phase) * 2.2;
+      const bobAng = Math.sin(t * 1.7 + b.phase) * 0.025;
+      let bx = b.x;
+      let by = b.y + bobY;
+      if (b.type === "rowing") {
+        bx += Math.sin(t * 0.25) * 45;
+      }
+
+      ctx.save();
+      ctx.translate(bx, by);
+      ctx.rotate(b.angle + bobAng);
+      ctx.scale(b.scale, b.scale);
+
+      ctx.fillStyle = "rgba(20, 28, 28, 0.36)";
+      ctx.beginPath();
+      ctx.moveTo(-58, 5);
+      ctx.quadraticCurveTo(0, 22, 62, 4);
+      ctx.quadraticCurveTo(0, -6, -58, 5);
+      ctx.fill();
+
+      ctx.fillStyle = "#362214";
+      ctx.beginPath();
+      ctx.moveTo(-62, 0);
+      ctx.quadraticCurveTo(0, -16, 64, -2);
+      ctx.quadraticCurveTo(0, 16, -62, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#694d3b";
+      ctx.beginPath();
+      ctx.moveTo(-48, 0);
+      ctx.quadraticCurveTo(0, -11, 50, -1);
+      ctx.quadraticCurveTo(0, 11, -48, 0);
+      ctx.fill();
+
+      ctx.strokeStyle = "#8c6b54";
+      ctx.lineWidth = 1.6;
+      for (let tx = -30; tx <= 30; tx += 15) {
+        ctx.beginPath();
+        ctx.moveTo(tx, -8);
+        ctx.lineTo(tx, 8);
+        ctx.stroke();
+      }
+
+      if (b.hasChhai) {
+        const chhaiGrad = ctx.createLinearGradient(-18, -20, 22, 2);
+        chhaiGrad.addColorStop(0, "#b59052");
+        chhaiGrad.addColorStop(1, "#7a5c2b");
+        ctx.fillStyle = chhaiGrad;
+        ctx.beginPath();
+        ctx.moveTo(-18, 2);
+        ctx.quadraticCurveTo(2, -19, 22, 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#5c421c";
+        ctx.lineWidth = 1.1;
+        [-10, 0, 10].forEach(rx => {
+          ctx.beginPath();
+          ctx.moveTo(rx, 2);
+          ctx.lineTo(rx * 0.85, -12);
+          ctx.stroke();
+        });
+      }
+
+      if (b.type !== "moored" || b.phase < 1.0) {
+        ctx.fillStyle = "#24523b";
+        ctx.fillRect(-38, -5, 10, 8);
+        ctx.fillStyle = "#e8e4d9";
+        ctx.fillRect(-38, -11, 9, 7);
+        ctx.fillStyle = "#7c4f32";
+        ctx.beginPath();
+        ctx.arc(-33, -14, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        const oarSwing = Math.sin(t * 3.2 + b.phase) * 0.45;
+        ctx.strokeStyle = "#b89768";
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.moveTo(-32, -4);
+        ctx.lineTo(-32 + Math.sin(oarSwing) * 26, 22);
+        ctx.stroke();
+      }
+
+      if (b.type === "net_cast1" || b.type === "net_cast2") {
+        const cycleTime = ((t - b.castStart) % 14 + 14) % 14;
+        const reach = cycleTime < 2.5 ? -1.2 : 0.65;
+        drawPerson(ctx, {
+          x: 34, y: 2, scale: 0.56, dir: 1, isWalking: false,
+          role: "farmer", armReach: reach, wind, timeSec: t
+        });
+
+        if (cycleTime < 1.2) {
+          ctx.fillStyle = "rgba(214, 178, 126, 0.78)";
+          ctx.beginPath();
+          ctx.arc(38, -8, 6, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (cycleTime < 2.5) {
+          const p = (cycleTime - 1.2) / 1.3;
+          const netDist = lerp(12, 95, p);
+          const netLift = -Math.sin(p * Math.PI) * 38;
+          const netRad = lerp(8, 48, easeInOutCubic(p));
+          const nx = 36 + netDist;
+          const ny = netLift;
+
+          ctx.fillStyle = "rgba(222, 184, 135, 0.44)";
+          ctx.strokeStyle = "rgba(138, 98, 54, 0.68)";
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.ellipse(nx, ny, netRad, netRad * 0.68, -0.15, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          for (let r = 0; r < 8; r++) {
+            const a = (r / 8) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(36, -10);
+            ctx.lineTo(nx + Math.cos(a) * netRad, ny + Math.sin(a) * netRad * 0.68);
+            ctx.stroke();
+          }
+        } else if (cycleTime < 5.5) {
+          const p = (cycleTime - 2.5) / 3.0;
+          const nx = 131;
+          const ny = 4;
+          for (let ring = 0; ring < 3; ring++) {
+            const rp = clamp(p * 1.3 - ring * 0.22, 0, 1);
+            if (rp > 0 && rp < 1) {
+              ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - rp) * 0.78})`;
+              ctx.lineWidth = 2.2 * (1 - rp);
+              ctx.beginPath();
+              ctx.ellipse(nx, ny, 12 + rp * 58, (12 + rp * 58) * 0.65, 0, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+          }
+          ctx.strokeStyle = `rgba(210, 175, 125, ${(1 - p) * 0.5})`;
+          ctx.beginPath();
+          ctx.moveTo(36, -8);
+          ctx.lineTo(nx, ny);
+          ctx.stroke();
+        } else if (cycleTime < 9.5) {
+          const p = (cycleTime - 5.5) / 4.0;
+          const nx = lerp(128, 42, p);
+          const ny = lerp(4, -4, p);
+          ctx.fillStyle = "rgba(205, 172, 126, 0.45)";
+          ctx.beginPath();
+          ctx.moveTo(36, -9);
+          ctx.lineTo(nx + 14, ny - 10);
+          ctx.lineTo(nx + 14, ny + 10);
+          ctx.closePath();
+          ctx.fill();
+
+          for (let f = 0; f < 4; f++) {
+            const fx = nx + Math.sin(t * 14 + f * 2) * 7;
+            const fy = ny + Math.cos(t * 16 + f) * 5;
+            ctx.fillStyle = "#f8fafc";
+            ctx.beginPath();
+            ctx.ellipse(fx, fy, 4.2, 1.8, Math.sin(t * 12 + f), 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      ctx.restore();
+    });
+
+    ctx.restore();
+  }
+
+  function drawVillageLife(ctx, t, atm) {
+    const { wind } = atm;
+    const breathe = Math.sin(t * 2.6);
+    ctx.save();
+
+    const bgTrees = [
+      { x: 580,  y: 440, trunkW: 16, trunkH: 92, sprite: banyanCanopyA,       phase: 0.2, type: "banyan" },
+      { x: 735,  y: 445, trunkW: 13, trunkH: 78, sprite: mangoCanopySprite,   phase: 1.1, type: "mango" },
+      { x: 895,  y: 425, trunkW: 14, trunkH: 82, sprite: jackfruitCanopySprite, phase: 1.9, type: "jackfruit" },
+      { x: 1055, y: 395, trunkW: 15, trunkH: 85, sprite: banyanCanopyB,       phase: 2.6, type: "banyan" },
+      { x: 1235, y: 375, trunkW: 13, trunkH: 76, sprite: mangoCanopySprite,   phase: 3.3, type: "mango" },
+      { x: 1395, y: 360, trunkW: 12, trunkH: 72, sprite: jackfruitCanopySprite, phase: 4.1, type: "jackfruit" },
+      { x: 245,  y: 535, trunkW: 15, trunkH: 88, sprite: banyanCanopyA,       phase: 0.8, type: "banyan" }
+    ];
+
+    for (const bt of bgTrees) {
+      const sway = sampleWind(bt.x, bt.y, t + bt.phase, wind) * 16;
+      drawDetailedTrunkAndBranches(ctx, bt.x, bt.y, bt.trunkW, bt.trunkH, sway);
+
+      if (bt.type === "banyan") {
+        ctx.strokeStyle = "#4f3622";
+        ctx.lineWidth = 2.0;
+        [-24, -14, 16, 26].forEach((rx, idx) => {
+          ctx.beginPath();
+          ctx.moveTo(bt.x + rx + sway * 0.4, bt.y - bt.trunkH - 8);
+          ctx.quadraticCurveTo(bt.x + rx + sway * 0.8, bt.y - bt.trunkH * 0.4, bt.x + rx + sway * 0.5, bt.y - 6 - (idx % 2) * 14);
+          ctx.stroke();
+        });
+      }
+
+      if (bt.type === "jackfruit") {
+        [[-11, -bt.trunkH * 0.58], [10, -bt.trunkH * 0.45]].forEach(([dx, dy]) => {
+          const jx = bt.x + dx + sway * 0.2;
+          const jy = bt.y + dy;
+          ctx.fillStyle = "#6d822b";
+          ctx.beginPath();
+          ctx.ellipse(jx, jy, 6.5, 11, 0.15, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      const topX = bt.x + sway * 0.85;
+      const topY = bt.y - bt.trunkH - 36;
+      ctx.save();
+      ctx.translate(topX, topY);
+      ctx.rotate(sway * 0.004);
+      ctx.drawImage(bt.sprite, -bt.sprite.width * 0.52, -bt.sprite.height * 0.55);
+      ctx.drawImage(bt.sprite, -bt.sprite.width * 0.35 + sway * 0.2, -bt.sprite.height * 0.65, bt.sprite.width * 0.78, bt.sprite.height * 0.78);
+      ctx.restore();
+    }
+
+    for (const b of BAMBOO_STALKS) {
+      const sway = sampleWind(b.x, b.y, t + b.phase, wind) * 32;
+      const tipX = b.x + b.lean + sway;
+      const tipY = b.y - b.h + Math.abs(sway) * 0.18;
+      const ctrlX = b.x + (b.lean + sway) * 0.45;
+      const ctrlY = b.y - b.h * 0.55;
+
+      ctx.strokeStyle = "#5c7a3b";
+      ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      ctx.moveTo(b.x, b.y);
+      ctx.quadraticCurveTo(ctrlX, ctrlY, tipX, tipY);
+      ctx.stroke();
+
+      for (let u = 0.45; u <= 1.0; u += 0.18) {
+        const lx = (1 - u) * (1 - u) * b.x + 2 * (1 - u) * u * ctrlX + u * u * tipX;
+        const ly = (1 - u) * (1 - u) * b.y + 2 * (1 - u) * u * ctrlY + u * u * tipY;
+        const windAng = (sway / 35) * 0.45;
+        [-1, 1].forEach(side => {
+          ctx.save();
+          ctx.translate(lx, ly);
+          ctx.rotate(side * 0.45 + windAng);
+          ctx.fillStyle = "#4d732c";
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(9 * side, -3, 18 * side, 1);
+          ctx.quadraticCurveTo(9 * side, 3, 0, 0);
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+    }
+
+    const sag = 7 + Math.sin(t * 3.0) * 3;
+    ctx.strokeStyle = "#3d352e";
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(465, 625);
+    ctx.quadraticCurveTo(535, 628 + sag, 605, 622);
+    ctx.stroke();
+    [
+      { u: 0.22, w: 34, h: 38, col: "#c0392b", border: "#f1c40f" },
+      { u: 0.56, w: 32, h: 36, col: "#2471a3", border: "#f7f9f9" }
+    ].forEach(item => {
+      const ix = lerp(465, 605, item.u);
+      const iy = 625 + Math.sin(item.u * Math.PI) * sag * 0.5;
+      const flap = sampleWind(ix, iy, t * 1.5, wind) * 22;
+      ctx.fillStyle = item.col;
+      ctx.beginPath();
+      ctx.moveTo(ix, iy);
+      ctx.lineTo(ix + item.w, iy);
+      ctx.lineTo(ix + item.w + flap, iy + item.h);
+      ctx.lineTo(ix + flap * 0.8, iy + item.h);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = item.border;
+      ctx.fillRect(ix + flap * 0.8, iy + item.h - 5, item.w, 4);
+    });
+
+    function drawRickshawVan(rx, ry, scale, hasHood, moving) {
+      ctx.save();
+      ctx.translate(rx, ry);
+      ctx.scale(scale, scale);
+
+      const wheelRot = moving ? t * 6.5 : 0;
+      ctx.fillStyle = "rgba(25, 22, 16, 0.35)";
+      ctx.beginPath();
+      ctx.ellipse(0, 14, 34, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#855834";
+      ctx.fillRect(-32, -2, 38, 7);
+
+      if (hasHood) {
+        ctx.fillStyle = "#e63946";
+        ctx.beginPath();
+        ctx.moveTo(-28, -2);
+        ctx.quadraticCurveTo(-14, -30, 2, -2);
+        ctx.fill();
+        ctx.fillStyle = "#f4d35e";
+        ctx.beginPath();
+        ctx.arc(-13, -15, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = "#1e293b";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(4, 2);
+      ctx.lineTo(18, -14);
+      ctx.lineTo(26, 4);
+      ctx.stroke();
+
+      [-22, -4, 26].forEach((wx) => {
+        ctx.save();
+        ctx.translate(wx, 6);
+        ctx.rotate(wheelRot);
+        ctx.strokeStyle = "#2b2b2b";
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 11, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = "#d4af37";
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.arc(0, 0, 8, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let s = 0; s < 4; s++) {
+          const a = (s / 4) * Math.PI;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(a) * -10, Math.sin(a) * -10);
+          ctx.lineTo(Math.cos(a) * 10, Math.sin(a) * 10);
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
+
+      if (moving) {
+        drawPerson(ctx, {
+          x: 13, y: 6, scale: 0.62, dir: 1, walkPhase: t * 8,
+          isWalking: true, role: "farmer", wind, timeSec: t
+        });
+      }
+      ctx.restore();
+    }
+
+    drawRickshawVan(785, 675, 1.0, true, false);
+    const vanProgress = (t * 0.032) % 1;
+    drawRickshawVan(lerp(660, 1020, vanProgress), lerp(735, 575, vanProgress), 0.95, true, true);
+
+    drawPerson(ctx, {
+      x: 845, y: 562, scale: 0.74, dir: 1, isSitting: true,
+      breathe, wind, role: "grandmother", timeSec: t
+    });
+    drawPerson(ctx, {
+      x: 862, y: 598, scale: 0.78, dir: 1, isSitting: true,
+      breathe, wind, role: "mother", armReach: 0.85 + Math.sin(t * 2.4) * 0.2, timeSec: t
+    });
+
+    const p1 = (t * 0.024) % 1;
+    drawPerson(ctx, {
+      x: lerp(1020, 1220, p1), y: lerp(615, 490, p1), scale: 0.78, dir: 1,
+      walkPhase: t * 6.8, isWalking: true, breathe, wind, role: "farmer", timeSec: t
+    });
+    const p2 = ((t * 0.021) + 0.5) % 1;
+    drawPerson(ctx, {
+      x: lerp(1190, 940, p2), y: lerp(510, 655, p2), scale: 0.78, dir: -1,
+      walkPhase: t * 6.4, isWalking: true, breathe, wind, role: "mother", timeSec: t
+    });
+
+    CATTLE.forEach((cow) => {
+      ctx.save();
+      ctx.translate(cow.x, cow.y);
+      ctx.scale(cow.scale * cow.dir, cow.scale);
+
+      let isMooing = false;
+      for (const mt of cow.mooTimes) {
+        if (t >= mt && t <= mt + 1.7) isMooing = true;
+      }
+
+      ctx.fillStyle = "rgba(15, 12, 8, 0.28)";
+      ctx.beginPath();
+      ctx.ellipse(0, 1, 22, 4.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      [-14, -8, 9, 14].forEach((lx, idx) => {
+        ctx.strokeStyle = idx % 2 === 0 ? cow.botCol : cow.midCol;
+        ctx.lineWidth = 3.2;
+        ctx.beginPath();
+        ctx.moveTo(lx, -12);
+        ctx.lineTo(lx, 0);
+        ctx.stroke();
+        ctx.fillStyle = "#2b241d";
+        ctx.fillRect(lx - 1.5, -1, 3, 2);
+      });
+
+      const cowGrad = ctx.createLinearGradient(0, -28, 0, -9);
+      cowGrad.addColorStop(0, cow.topCol);
+      cowGrad.addColorStop(0.6, cow.midCol);
+      cowGrad.addColorStop(1, cow.botCol);
+      ctx.fillStyle = cowGrad;
+      ctx.beginPath();
+      ctx.moveTo(-19, -12);
+      ctx.quadraticCurveTo(-21, -24, -12, -25);
+      ctx.lineTo(5, -25);
+      if (!cow.isCalf) {
+        ctx.quadraticCurveTo(11, -31, 15, -24);
+      }
+      ctx.lineTo(18, -12);
+      ctx.quadraticCurveTo(0, -9, -19, -12);
+      ctx.fill();
+
+      const tailSwish = Math.sin(t * 3.8 + cow.phase) * 4.5;
+      ctx.strokeStyle = cow.botCol;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(-19, -22);
+      ctx.quadraticCurveTo(-24 + tailSwish, -14, -22 + tailSwish, -6);
+      ctx.stroke();
+      ctx.fillStyle = "#261b12";
+      ctx.beginPath();
+      ctx.ellipse(-22 + tailSwish, -5, 1.8, 3.2, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      const grazeDip = isMooing ? -4 : (Math.sin(t * 1.4 + cow.phase) > 0.1 ? 5 : 0);
+      ctx.fillStyle = cow.midCol;
+      ctx.beginPath();
+      ctx.moveTo(12, -13);
+      ctx.quadraticCurveTo(19, -10 + grazeDip * 0.5, 21, -18 + grazeDip);
+      ctx.lineTo(14, -23 + grazeDip * 0.3);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = cow.topCol;
+      ctx.beginPath();
+      ctx.moveTo(16, -25 + grazeDip);
+      ctx.lineTo(27, -19 + grazeDip);
+      ctx.lineTo(25, -15 + grazeDip);
+      ctx.lineTo(16, -18 + grazeDip);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#2b221a";
+      ctx.beginPath();
+      ctx.arc(26, -17 + grazeDip, 1.8, 0, Math.PI * 2);
+      ctx.arc(20, -22 + grazeDip, 1.0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const earAng = Math.sin(t * 8 + cow.phase) > 0.7 ? 1.8 : 2.4;
+      ctx.fillStyle = cow.botCol;
+      ctx.beginPath();
+      ctx.ellipse(15, -22 + grazeDip, 3.5, 1.6, earAng, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (!cow.isCalf) {
+        ctx.strokeStyle = "#4a3f35";
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(17, -25 + grazeDip);
+        ctx.quadraticCurveTo(18, -32 + grazeDip, 22, -29 + grazeDip);
+        ctx.stroke();
+      }
+
+      if (isMooing) {
+        const ringP = (t * 2.2) % 1;
+        ctx.strokeStyle = `rgba(255, 248, 215, ${(1 - ringP) * 0.75})`;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(29, -18 + grazeDip, 5 + ringP * 18, -0.7, 0.7);
+        ctx.stroke();
+      }
+      ctx.restore();
+    });
+
+    ctx.save();
+    ctx.translate(520 + Math.sin(t * 0.7) * 16, 725);
+    ctx.scale(1.15, 1.15);
+    ctx.fillStyle = "#24211e";
+    ctx.beginPath();
+    ctx.roundRect(-11, -15, 19, 9.5, 4);
+    ctx.moveTo(6, -13);
+    ctx.lineTo(13, -18);
+    ctx.lineTo(15, -14);
+    ctx.lineTo(8, -10);
+    ctx.fill();
+    ctx.strokeStyle = "#24211e";
+    ctx.lineWidth = 2;
+    [-8, -4, 4, 7].forEach(lx => {
+      ctx.beginPath();
+      ctx.moveTo(lx, -6);
+      ctx.lineTo(lx, 0);
+      ctx.stroke();
+    });
+    ctx.restore();
+
+    for (let c = 0; c < 4; c++) {
+      const cx = 465 + c * 22 + Math.sin(t * 1.1 + c * 2) * 10;
+      const cy = 748 + (c % 2) * 14;
+      const peck = Math.sin(t * 6.5 + c * 1.7) > 0.4 ? 3.5 : 0;
+      ctx.fillStyle = c % 2 === 1 ? "#c8763e" : "#f2e8d5";
+      ctx.beginPath();
+      ctx.ellipse(cx, cy - 4.5, 6, 4.2, 0, 0, Math.PI * 2);
+      ctx.arc(cx + 5.5, cy - 6.5 + peck, 2.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#e67e22";
+      ctx.fillRect(cx + 7.5, cy - 6.5 + peck, 2.5, 1.4);
+    }
+
+    KITE_KIDS.forEach((kid) => {
+      const runOffsetX = Math.sin(t * 1.4 + kid.phase) * 26;
+      const runOffsetY = Math.cos(t * 1.1 + kid.phase) * 12;
+      const kx = kid.baseX + runOffsetX;
+      const ky = kid.baseY + runOffsetY;
+      const dir = Math.cos(t * 1.4 + kid.phase) >= 0 ? 1 : -1;
+
+      drawPerson(ctx, {
+        x: kx, y: ky, scale: 0.72, dir, walkPhase: t * 9.5 + kid.phase,
+        isWalking: true, isRunning: true, breathe, wind,
+        role: kid.role, shirtCol: kid.shirt, pantsCol: kid.pants,
+        armReach: kid.hasKite ? -1.15 : 0, timeSec: t
+      });
+
+      if (kid.hasKite) {
+        const handX = kx + dir * 8;
+        const handY = ky - 28;
+        const kiteX = kid.kiteX + Math.sin(t * 2.1 + kid.phase) * 28;
+        const kiteY = kid.kiteY + Math.cos(t * 2.7 + kid.phase) * 18;
+
+        ctx.strokeStyle = "rgba(255, 248, 230, 0.72)";
+        ctx.lineWidth = 1.15;
+        ctx.beginPath();
+        ctx.moveTo(handX, handY);
+        ctx.quadraticCurveTo((handX + kiteX) * 0.5 + 15, (handY + kiteY) * 0.5 + 22, kiteX, kiteY);
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(kiteX, kiteY);
+        ctx.rotate(Math.sin(t * 3.8 + kid.phase) * 0.22 - 0.35);
+
+        ctx.strokeStyle = kid.kiteColor1;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(0, 16);
+        for (let seg = 1; seg <= 5; seg++) {
+          ctx.lineTo(Math.sin(t * 9 + seg * 1.1 + kid.phase) * (seg * 3.2), 16 + seg * 6.5);
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = kid.kiteColor1;
+        ctx.beginPath();
+        ctx.moveTo(0, -16);
+        ctx.lineTo(15, 0);
+        ctx.lineTo(-15, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = kid.kiteColor2;
+        ctx.beginPath();
+        ctx.moveTo(15, 0);
+        ctx.lineTo(0, 16);
+        ctx.lineTo(-15, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = "#f4d35e";
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(0, -16); ctx.lineTo(0, 16);
+        ctx.moveTo(-15, 0); ctx.quadraticCurveTo(0, -7, 15, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+    });
+
+    ctx.restore();
+  }
+
+  function drawSwayingFoliageAndSmoke(ctx, t, atm) {
+    const { wind, lantern, fireflyAmt } = atm;
+    ctx.save();
+
+    for (const b of AERIAL_BANANAS) {
+      const sway = sampleWind(b.x, b.y, t + b.phase, wind) * 20;
+      const s = b.scale;
+      const stemGrad = ctx.createLinearGradient(b.x - 5 * s, b.y - 52 * s, b.x + 5 * s, b.y);
+      stemGrad.addColorStop(0, "#6e9442");
+      stemGrad.addColorStop(0.6, "#557830");
+      stemGrad.addColorStop(1, "#435925");
+      ctx.fillStyle = stemGrad;
+      ctx.beginPath();
+      ctx.moveTo(b.x - 5.5 * s, b.y);
+      ctx.lineTo(b.x - 3.5 * s + sway * 0.12, b.y - 50 * s);
+      ctx.lineTo(b.x + 3.5 * s + sway * 0.12, b.y - 50 * s);
+      ctx.lineTo(b.x + 5.5 * s, b.y);
+      ctx.closePath();
+      ctx.fill();
+
+      if (b.hasMocha) {
+        const mx = b.x + 6 * s + sway * 0.2;
+        const my = b.y - 42 * s;
+        ctx.fillStyle = "#7ea33e";
+        ctx.beginPath();
+        ctx.arc(mx, my + 2, 4.5 * s, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#7a2848";
+        ctx.beginPath();
+        ctx.moveTo(mx - 2.5 * s, my + 9 * s);
+        ctx.lineTo(mx + 4.5 * s, my + 9 * s);
+        ctx.lineTo(mx + 1 * s, my + 18 * s);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      const leafAngles = [-2.55, -2.05, -1.35, -0.75, -0.22, 0.25];
+      for (let i = 0; i < leafAngles.length; i++) {
+        const ang = leafAngles[i] + (sway / 28) * 0.38;
+        ctx.save();
+        ctx.translate(b.x + sway * 0.12, b.y - 49 * s);
+        ctx.rotate(ang);
+        const len = 38 * s;
+        const wid = 8.5 * s;
+        ctx.fillStyle = i % 2 === 0 ? "#6fa13f" : "#56822d";
+        for (let seg = 0; seg < 4; seg++) {
+          const sx0 = (seg / 4) * len + 3;
+          const sx1 = ((seg + 0.9) / 4) * len + 2;
+          ctx.beginPath();
+          ctx.moveTo(sx0, -wid * (1 - seg * 0.15));
+          ctx.lineTo(sx1, -wid * (1 - (seg + 1) * 0.18));
+          ctx.lineTo(sx1 - 1, wid * (1 - (seg + 1) * 0.18));
+          ctx.lineTo(sx0 - 1, wid * (1 - seg * 0.15));
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.strokeStyle = "#b4cc66";
+        ctx.lineWidth = 1.4 * s;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(len, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    for (const p of AERIAL_PALMS) {
+      const isBetel = p.type === "betel";
+      const sway = sampleWind(p.x, p.y, t + p.phase, wind) * (isBetel ? 34 : 26);
+      const topX = p.x + p.lean + sway;
+      const topY = p.y - p.h + Math.abs(sway) * 0.15;
+      const ctrlX = p.x + p.lean * 0.5 + sway * 0.35;
+      const ctrlY = p.y - p.h * 0.5;
+
+      const baseW = isBetel ? 3.4 : 7.0;
+      const topW = isBetel ? 1.8 : 3.5;
+      ctx.fillStyle = isBetel ? "#6e624d" : "#594431";
+      ctx.beginPath();
+      ctx.moveTo(p.x - baseW, p.y);
+      ctx.quadraticCurveTo(ctrlX - (baseW + topW) * 0.5, ctrlY, topX - topW, topY);
+      ctx.lineTo(topX + topW, topY);
+      ctx.quadraticCurveTo(ctrlX + (baseW + topW) * 0.5, ctrlY, p.x + baseW, p.y);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = isBetel ? "rgba(210, 198, 175, 0.38)" : "rgba(38, 26, 16, 0.42)";
+      ctx.lineWidth = 1.1;
+      const ringSteps = isBetel ? 16 : 20;
+      for (let r = 1; r < ringSteps; r++) {
+        const u = r / ringSteps;
+        const rx = (1 - u) * (1 - u) * p.x + 2 * (1 - u) * u * ctrlX + u * u * topX;
+        const ry = (1 - u) * (1 - u) * p.y + 2 * (1 - u) * u * ctrlY + u * u * topY;
+        const rw = lerp(baseW, topW, u);
+        ctx.beginPath();
+        ctx.moveTo(rx - rw, ry);
+        ctx.lineTo(rx + rw, ry);
+        ctx.stroke();
+      }
+
+      if (isBetel) {
+        ctx.fillStyle = "#4e7334";
+        ctx.fillRect(topX - 2.2, topY - 2, 4.4, 10);
+        ctx.fillStyle = "#d9822b";
+        [-3.5, 0, 3.5].forEach(bx => {
+          ctx.beginPath();
+          ctx.arc(topX + bx, topY + 8, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      } else {
+        ctx.fillStyle = "#6a7d2c";
+        [[-5, 5], [0, 7], [5, 5], [-2, 3], [3, 3]].forEach(([cx, cy]) => {
+          ctx.beginPath();
+          ctx.arc(topX + cx, topY + cy, 4.2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      const fLen = isBetel ? 38 : 66;
+      const leafletPairs = isBetel ? 11 : 16;
+      for (let f = 0; f < p.fronds; f++) {
+        const baseAng = -Math.PI * 1.15 + (f / (p.fronds - 1)) * Math.PI * 1.3;
+        const ang = baseAng + (sway / 35) * 0.52;
+        const fx = topX + Math.cos(ang) * fLen;
+        const fy = topY + Math.sin(ang) * fLen * 0.72 + (isBetel ? 9 : 16);
+        const fCtrlX = (topX + fx) * 0.5;
+        const fCtrlY = (topY + fy) * 0.5 - (isBetel ? 9 : 15);
+
+        ctx.strokeStyle = f % 2 === 0 ? "#4d7533" : "#385924";
+        ctx.lineWidth = isBetel ? 1.5 : 2.0;
+        ctx.beginPath();
+        ctx.moveTo(topX, topY);
+        ctx.quadraticCurveTo(fCtrlX, fCtrlY, fx, fy);
+        ctx.stroke();
+
+        ctx.strokeStyle = f % 2 === 0 ? "#4a7331" : "#325220";
+        ctx.lineWidth = isBetel ? 1.0 : 1.15;
+        ctx.beginPath();
+        for (let k = 2; k <= leafletPairs; k++) {
+          const u = k / (leafletPairs + 1);
+          const lx = (1 - u) * (1 - u) * topX + 2 * (1 - u) * u * fCtrlX + u * u * fx;
+          const ly = (1 - u) * (1 - u) * topY + 2 * (1 - u) * u * fCtrlY + u * u * fy;
+          const leafLen = Math.sin(u * Math.PI) * (isBetel ? 10 : 16);
+          const flutter = Math.sin(t * 7 + f + k * 0.7) * (1.2 + wind * 3.5);
+          ctx.moveTo(lx, ly);
+          ctx.lineTo(lx + wind * 5 + flutter, ly + leafLen);
+          ctx.moveTo(lx, ly);
+          ctx.lineTo(lx + (fx >= topX ? 3 : -3) + flutter * 0.6, ly - leafLen * 0.45);
+        }
+        ctx.stroke();
+      }
+    }
+
+    for (let i = 0; i < 16; i++) {
+      const p = ((t * 0.22 + i / 16) % 1);
+      const sx = 880 + p * (45 + wind * 95) + Math.sin(t * 1.8 + i) * 10;
+      const sy = 582 - p * 145;
+      const rad = 6 + p * 28;
+      const alpha = Math.sin(p * Math.PI) * 0.28;
+      ctx.fillStyle = `rgba(232, 224, 212, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy, rad, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (lantern > 0.01) {
+      ctx.save();
+      ctx.globalCompositeOperation = "screen";
+      [
+        { x: 855, y: 555, r: 145 },
+        { x: 345, y: 645, r: 135 },
+        { x: 1180, y: 440, r: 110 }
+      ].forEach(l => {
+        const flicker = 0.92 + 0.08 * Math.sin(t * 17 + l.x);
+        const glow = ctx.createRadialGradient(l.x, l.y, 4, l.x, l.y, l.r * flicker);
+        glow.addColorStop(0, `rgba(255, 204, 102, ${0.62 * lantern})`);
+        glow.addColorStop(0.45, `rgba(245, 148, 62, ${0.28 * lantern})`);
+        glow.addColorStop(1, "rgba(235, 120, 40, 0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(l.x, l.y, l.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      if (fireflyAmt > 0.02) {
+        for (const ff of FIREFLIES) {
+          const fx = ff.x + Math.sin(t * 0.8 + ff.phase) * 28;
+          const fy = ff.y + Math.cos(t * 1.2 + ff.phase) * 18;
+          const pulse = Math.pow(0.5 + 0.5 * Math.sin(t * 3.6 + ff.phase), 2.2) * fireflyAmt;
+          if (pulse < 0.05) continue;
+          const ffGlow = ctx.createRadialGradient(fx, fy, 0.5, fx, fy, 16);
+          ffGlow.addColorStop(0, `rgba(235, 255, 130, ${pulse * 0.95})`);
+          ffGlow.addColorStop(0.4, `rgba(180, 235, 65, ${pulse * 0.45})`);
+          ffGlow.addColorStop(1, "rgba(140, 210, 40, 0)");
+          ctx.fillStyle = ffGlow;
+          ctx.beginPath();
+          ctx.arc(fx, fy, 16, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  // ============================================================================
+  // 8B. EXACT REFERENCE CODE 2D INTERCITY TRAIN SPRITE & PARTICLE ENGINE
+  //     (Adapted directly from 'Intercity Pixel Train' reference code)
+  // ============================================================================
+  const REF_PALETTE = {
+    ink:       "#140c1c", navy:      "#1b1f3b", indigo:     "#2c2f5e", slate:     "#4a4f84",
+    purple:    "#6b4a7d", rose:      "#b85d6e", orange:     "#e8875a", peach:     "#f4c27a",
+    skyDeep:   "#3d7fc4", skyMid:    "#6aaee0", skyLight:   "#a8d8ef", white:     "#f4f4ec",
+    cloudShade:"#c4cedb", grayLight: "#9a9aa8", gray:       "#6c6c7a", grayDark:  "#43434f",
+    brownDark: "#3e2a22", brown:     "#6e4a32", tan:        "#b08a5c", cream:     "#ecdcae",
+    glow:      "#ffd65c", amber:     "#f0a030", red:        "#c23a30", rust:      "#8c4a3a",
+    greenDeep: "#12382a", greenDark: "#1e5a36", green:      "#2e7d3e", grass:     "#4f9a3c",
+    grassLight:"#86c04a", paddy:     "#c4c95a", haze:       "#4f7f6c", blue:      "#2a5a9c"
+  };
+
+  const REF_LIGHTING = {
+    day:  { lit: false, map: {} },
+    dusk: {
+      lit: true,
+      map: {
+        slate: "indigo", orange: "rose", peach: "orange", glow: "peach", amber: "orange",
+        skyDeep: "slate", skyMid: "purple", skyLight: "rose", white: "peach", cloudShade: "rose",
+        grayLight: "gray", gray: "grayDark", grayDark: "navy",
+        brownDark: "ink", brown: "brownDark", tan: "rust", cream: "peach", red: "rust", rust: "brown",
+        greenDeep: "ink", greenDark: "greenDeep", green: "greenDark", grass: "green",
+        grassLight: "grass", paddy: "tan", haze: "slate", blue: "indigo"
+      }
+    }
+  };
+
+  const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+  const bayer = (x, y) => BAYER4[((y & 3) << 2) | (x & 3)];
+  const randInt = (rng, a, b) => a + Math.floor(rng() * (b - a + 1));
+
+  const REF_CFG = {
+    CRUISE_SPEED: 80,
+    TRAIN_FRONT_X: 273,
+    LOCO_W: 46,
+    CAR_W: 39,
+    CAR_GAP: 2,
+    CAR_COUNT: 5,
+    WHEEL_R: 3.5,
+    WHEEL_FRAMES: 6,
+    SMOKE_MAX: 70,
+    SPARK_MAX: 70
+  };
+
+  const REF_LAYER_Y = {
+    poles: 92,
+    track: 140,
+    loco: 116,
+    car: 121,
+    wheel: 144
+  };
+
+  function makeRefCanvas(w, h) {
+    const c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    const g = c.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    return [c, g];
+  }
+
+  function refRect(g, x, y, w, h, col) {
+    g.fillStyle = col;
+    g.fillRect(Math.floor(x), Math.floor(y), Math.floor(w), Math.floor(h));
+  }
+
+  function refPx(g, x, y, col) {
+    g.fillStyle = col;
+    g.fillRect(Math.floor(x), Math.floor(y), 1, 1);
+  }
+
+  function refDitherRect(g, x, y, w, h, col, level) {
+    g.fillStyle = col;
+    for (let yy = y; yy < y + h; yy++) {
+      for (let xx = x; xx < x + w; xx++) {
+        if (bayer(xx, yy) < level) g.fillRect(xx, yy, 1, 1);
+      }
+    }
+  }
+
+  function refWrapX(tw, fn) {
+    fn(-tw);
+    fn(0);
+    fn(tw);
+  }
+
+  // Bangladeshi Intercity Rake geometry: Bo-Bo diesel locomotive + 5 carriages
+  const REF_TRAIN = (() => {
+    const locoX = REF_CFG.TRAIN_FRONT_X - REF_CFG.LOCO_W;
+    const vehicles = [{ x: locoX, w: REF_CFG.LOCO_W, y: REF_LAYER_Y.loco, wheels: [6, 14, 31, 39] }];
+    let x = locoX;
+    for (let i = 0; i < REF_CFG.CAR_COUNT; i++) {
+      x -= REF_CFG.CAR_GAP + REF_CFG.CAR_W;
+      vehicles.push({ x, w: REF_CFG.CAR_W, y: REF_LAYER_Y.car, wheels: [5, 13, 25, 33] });
+    }
+    return {
+      vehicles,
+      totalLen: REF_CFG.TRAIN_FRONT_X - x,
+      stackX: locoX + 15,
+      stackY: REF_LAYER_Y.loco - 1
+    };
+  })();
+
+  // 7x7 wheel with four spokes; frames cover a quarter turn (exact from Reference Code)
+  function buildRefWheels(p) {
+    const frames = [];
+    for (let f = 0; f < REF_CFG.WHEEL_FRAMES; f++) {
+      const [c, g] = makeRefCanvas(7, 7);
+      for (let y = 0; y < 7; y++) {
+        for (let x = 0; x < 7; x++) {
+          const d = Math.hypot(x - 3, y - 3);
+          if (d <= 3.4) refPx(g, x, y, d > 2.4 ? p.ink : p.grayDark);
+        }
+      }
+      const base = (f / REF_CFG.WHEEL_FRAMES) * (Math.PI / 2);
+      for (let k = 0; k < 4; k++) {
+        const a = base + k * (Math.PI / 2);
+        for (const r of [1, 2]) {
+          refPx(g, 3 + Math.round(Math.cos(a) * r), 3 + Math.round(Math.sin(a) * r), p.grayLight);
+        }
+      }
+      refPx(g, 3, 3, p.gray);
+      frames.push(c);
+    }
+    return frames;
+  }
+
+  // Locomotive body, 48x28 (exact from Reference Code)
+  function buildRefLoco(p, lit) {
+    const [c, g] = makeRefCanvas(48, 28);
+    // roof equipment: radiator fan housing, exhaust stack, twin-trumpet horn
+    refRect(g, 4, 1, 8, 2, p.grayDark);
+    refRect(g, 5, 1, 6, 1, p.gray);
+    for (let x = 5; x < 11; x += 2) refPx(g, x, 2, p.ink);
+    refRect(g, 15, 0, 2, 3, p.grayDark);
+    refRect(g, 15, 0, 2, 1, p.ink);
+    refRect(g, 37, 2, 2, 1, p.grayDark);
+    refRect(g, 35, 1, 5, 1, p.grayLight);
+    refRect(g, 40, 0, 1, 3, p.grayLight);
+    // roof and gutter, rounded towards the nose
+    refRect(g, 1, 3, 41, 1, p.grayLight);
+    refRect(g, 0, 4, 43, 1, p.gray);
+    // boxy body
+    refRect(g, 0, 5, 44, 1, p.blue);
+    refRect(g, 0, 6, 45, 17, p.blue);
+    refRect(g, 0, 5, 1, 18, p.navy);
+    refRect(g, 0, 22, 45, 1, p.navy);
+    // livery: cream band and thin red line (lines up with the carriages)
+    refRect(g, 1, 14, 44, 2, p.cream);
+    refRect(g, 1, 16, 44, 1, p.red);
+    // hood louvres
+    for (const [x0, x1] of [[3, 13], [17, 29]]) {
+      refRect(g, x0 - 1, 6, x1 - x0 + 3, 1, p.navy);
+      for (let x = x0; x <= x1; x += 2) refRect(g, x, 7, 1, 5, p.navy);
+    }
+    refRect(g, 32, 5, 1, 9, p.navy); // hood / cab seam
+    // cab door, door window and grab rail
+    refRect(g, 33, 6, 3, 1, p.navy);
+    refRect(g, 33, 6, 1, 16, p.navy);
+    refRect(g, 35, 6, 1, 16, p.navy);
+    refPx(g, 34, 8, p.skyLight);
+    refPx(g, 34, 9, p.indigo);
+    refRect(g, 36, 12, 1, 9, p.grayLight);
+    // small cab window (warm cab light after dark)
+    refRect(g, 37, 6, 6, 6, p.navy);
+    if (lit) {
+      refRect(g, 38, 7, 4, 4, REF_PALETTE.amber);
+      refRect(g, 38, 7, 4, 1, REF_PALETTE.glow);
+    } else {
+      refRect(g, 38, 7, 4, 4, p.indigo);
+      refRect(g, 38, 7, 4, 1, p.skyLight);
+      refPx(g, 38, 8, p.skyLight);
+    }
+    refRect(g, 44, 6, 1, 5, p.skyLight); // windscreen edge
+    // headlight housing on the nose
+    refRect(g, 45, 5, 2, 3, p.grayDark);
+    refPx(g, 45, 6, REF_PALETTE.glow);
+    refPx(g, 46, 6, REF_PALETTE.white);
+    // warning stripes on the nose, number plate
+    for (let y = 17; y <= 21; y++) refPx(g, 44, y, y % 2 ? p.amber : p.ink);
+    refRect(g, 20, 18, 7, 3, p.cream);
+    for (const x of [21, 22, 24, 25]) refPx(g, x, 19, p.ink);
+    // underframe, fuel tank, buffer beam and pilot
+    refRect(g, 1, 23, 43, 1, p.grayDark);
+    refRect(g, 18, 24, 11, 1, p.gray);
+    refRect(g, 18, 25, 11, 1, p.grayDark);
+    refRect(g, 19, 26, 9, 1, p.ink);
+    refRect(g, 0, 23, 2, 1, p.red);
+    refRect(g, 41, 23, 5, 1, p.red);
+    refPx(g, 46, 23, p.ink);
+    refRect(g, 42, 24, 4, 1, p.grayDark);
+    refRect(g, 43, 25, 4, 1, p.grayDark);
+    refRect(g, 44, 26, 3, 1, p.ink);
+    return c;
+  }
+
+  function refWindowPane(g, p, lit, x, y, w, h) {
+    if (lit) {
+      refRect(g, x, y, w, h, REF_PALETTE.glow);
+      refRect(g, x, y + h - 1, w, 1, REF_PALETTE.amber);
+    } else {
+      refRect(g, x, y, w, h, p.indigo);
+      refPx(g, x, y, p.skyLight);
+    }
+  }
+
+  // Passenger carriage, 39x19 (exact from Reference Code)
+  function buildRefCar(p, lit, seed) {
+    const rng = mulberry32(100 + seed);
+    const w = REF_CFG.CAR_W;
+    const [c, g] = makeRefCanvas(w, 19);
+    refRect(g, 3, 0, w - 6, 1, p.grayLight); // roof crown
+    refRect(g, 1, 1, w - 2, 1, p.gray);      // roof
+    refRect(g, 0, 2, w, 1, p.grayDark);      // rain gutter
+    refRect(g, 0, 3, w, 13, p.green);        // green body
+    refRect(g, 0, 9, w, 2, p.cream);         // cream stripe
+    refRect(g, 0, 11, w, 1, p.red);          // thin red line
+    refRect(g, 0, 15, w, 1, p.greenDark);
+    refRect(g, 0, 3, 1, 13, p.greenDark);
+    refRect(g, w - 1, 3, 1, 13, p.greenDark);
+    // a door at each end
+    for (const dx of [1, w - 5]) {
+      refRect(g, dx, 4, 4, 1, p.greenDark);
+      refRect(g, dx, 4, 1, 12, p.greenDark);
+      refRect(g, dx + 3, 4, 1, 12, p.greenDark);
+      refWindowPane(g, p, lit, dx + 1, 5, 2, 2);
+      refPx(g, dx === 1 ? dx + 2 : dx + 1, 12, p.grayLight);
+    }
+    // row of small windows, some with passengers
+    for (let i = 0; i < 5; i++) {
+      const wx = 8 + i * 5;
+      refWindowPane(g, p, lit, wx, 5, 3, 3);
+      if (rng() < 0.75) {
+        const hx = wx + randInt(rng, 0, 2);
+        const col = lit ? REF_PALETTE.rust : p.ink;
+        refPx(g, hx, 6, col);
+        const x0 = Math.max(wx, hx - 1);
+        const x1 = Math.min(wx + 2, hx + 1);
+        refRect(g, x0, 7, x1 - x0 + 1, 1, col);
+      }
+    }
+    // underframe and equipment box between the bogies
+    refRect(g, 1, 16, w - 2, 1, p.grayDark);
+    refRect(g, 2, 17, w - 4, 1, p.ink);
+    refRect(g, 17, 17, 5, 2, p.grayDark);
+    return c;
+  }
+
+  // Telegraph poles with sagging wires (exact from Reference Code)
+  function buildRefPoles(p) {
+    const TW = 192, TH = 56, SPACING = 96, TOP = 6, FOOT = 51, SAG = 5;
+    const [c, g] = makeRefCanvas(TW, TH);
+    for (let x = 48; x < TW; x += SPACING) {
+      for (const ax of [-4, 5]) {
+        for (let i = 0; i <= SPACING; i++) {
+          const u = i / SPACING;
+          const y = TOP + Math.round(SAG * 4 * u * (1 - u));
+          refWrapX(TW, (o) => refPx(g, x + ax + i + o, y, p.grayDark));
+        }
+      }
+      refRect(g, x, TOP, 2, FOOT - TOP, p.brown);
+      refRect(g, x + 1, TOP, 1, FOOT - TOP, p.brownDark);
+      refRect(g, x - 4, TOP + 1, 10, 1, p.brownDark); // cross-arm
+      refPx(g, x - 4, TOP, p.cloudShade);
+      refPx(g, x + 5, TOP, p.cloudShade); // insulators
+    }
+    return c;
+  }
+
+  // Track: gravel bed, wooden sleepers, two rails (exact from Reference Code)
+  function buildRefTrack(p) {
+    const TW = 192, TH = 20, rng = mulberry32(5);
+    const [c, g] = makeRefCanvas(TW, TH);
+    refRect(g, 0, 3, TW, 12, p.gray);     // ballast top
+    refRect(g, 0, 15, TW, 3, p.grayDark); // ballast shoulder
+    for (let i = 0; i < TW * 8; i++) {
+      const x = randInt(rng, 0, TW - 1);
+      const y = randInt(rng, 3, 17);
+      const r = rng();
+      refPx(
+        g, x, y,
+        y >= 15
+          ? (r < 0.5 ? p.gray : p.brownDark)
+          : r < 0.4 ? p.grayLight : r < 0.8 ? p.grayDark : p.brown
+      );
+    }
+    for (let x = 0; x < TW; x++) {
+      if (bayer(x, 3) < 8) refPx(g, x, 3, p.grayLight);
+    }
+    for (let x = 2; x < TW; x += 8) { // sleepers
+      refRect(g, x, 5, 4, 9, p.brown);
+      refRect(g, x + 3, 5, 1, 9, p.brownDark);
+      refRect(g, x, 13, 4, 1, p.brownDark);
+      refPx(g, x, 5, p.tan);
+    }
+    refRect(g, 0, 6, TW, 1, p.grayLight);
+    refRect(g, 0, 7, TW, 1, p.grayDark);  // far rail
+    refRect(g, 0, 11, TW, 1, p.grayLight);
+    refRect(g, 0, 12, TW, 1, p.grayDark); // near rail
+    return c;
+  }
+
+  function buildRefVariant(name) {
+    const def = REF_LIGHTING[name];
+    const p = {};
+    for (const k in REF_PALETTE) p[k] = REF_PALETTE[def.map[k] || k];
+    return {
+      name,
+      lit: def.lit,
+      p,
+      puffs: [],
+      poles: buildRefPoles(p),
+      track: buildRefTrack(p),
+      loco: buildRefLoco(p, def.lit),
+      cars: Array.from({ length: REF_CFG.CAR_COUNT }, (_, i) => buildRefCar(p, def.lit, i)),
+      wheels: buildRefWheels(p)
+    };
+  }
+
+  const REF_VARIANTS = {
+    day: buildRefVariant("day"),
+    dusk: buildRefVariant("dusk")
+  };
+
+  function refHaloSprite(r, rgb, a0) {
+    const [c, g] = makeRefCanvas(r * 2, r * 2);
+    const grad = g.createRadialGradient(r, r, 0, r, r, r);
+    grad.addColorStop(0, "rgba(" + rgb + "," + a0 + ")");
+    grad.addColorStop(0.35, "rgba(" + rgb + "," + a0 * 0.35 + ")");
+    grad.addColorStop(1, "rgba(" + rgb + ",0)");
+    g.fillStyle = grad;
+    g.fillRect(0, 0, r * 2, r * 2);
+    return c;
+  }
+
+  const REF_GLOW = (() => {
+    const warm = "255,196,96";
+    const small = refHaloSprite(5, warm, 0.52);
+    const cabHalo = refHaloSprite(7, warm, 0.58);
+    const [cone, cg] = makeRefCanvas(90, 50);
+    const lin = cg.createLinearGradient(0, 0, 90, 0);
+    lin.addColorStop(0, "rgba(255,236,170,0.62)");
+    lin.addColorStop(0.5, "rgba(255,226,150,0.24)");
+    lin.addColorStop(1, "rgba(255,220,140,0)");
+    cg.fillStyle = lin;
+    cg.beginPath();
+    cg.moveTo(0, 6);
+    cg.lineTo(90, 2);
+    cg.lineTo(90, 50);
+    cg.lineTo(0, 9);
+    cg.closePath();
+    cg.fill();
+    return {
+      small,
+      cabHalo,
+      cone,
+      flare: refHaloSprite(9, "255,240,190", 0.92),
+      spark: refHaloSprite(3, "255,190,90", 0.9)
+    };
+  })();
+
+  const SMOKE_SHADES = ["grayDark", "gray", "grayLight", "cloudShade"];
+
+  function refPuffSprite(v, r, dens, shade) {
+    const key = (r * 17 + dens) * 4 + shade;
+    let c = v.puffs[key];
+    if (!c) {
+      let g;
+      [c, g] = makeRefCanvas(r * 2 + 1, r * 2 + 1);
+      g.fillStyle = v.p[SMOKE_SHADES[shade]];
+      for (let y = -r; y <= r; y++) {
+        for (let x = -r; x <= r; x++) {
+          if (x * x + y * y <= (r + 0.5) * (r + 0.5) && bayer(x + r, y + r) < dens) {
+            g.fillRect(x + r, y + r, 1, 1);
+          }
+        }
+      }
+      v.puffs[key] = c;
+    }
+    return c;
+  }
+
+  // Smoke & Spark Pools (exact from Reference Code)
+  const refSmokePool = { items: Array.from({ length: REF_CFG.SMOKE_MAX }, () => ({ x: 0, y: 0, vx: 0, vy: 0, age: 0, life: 0, r0: 0, grow: 0, shade: 0 })), n: 0 };
+  const refSparkPool = { items: Array.from({ length: REF_CFG.SPARK_MAX }, () => ({ x: 0, y: 0, vx: 0, vy: 0, age: 0, life: 0 })), n: 0 };
+
+  function poolSpawn(pool, max) {
+    return pool.n < Math.min(max, pool.items.length) ? pool.items[pool.n++] : null;
+  }
+  function poolKill(pool, i) {
+    const dead = pool.items[i];
+    pool.items[i] = pool.items[--pool.n];
+    pool.items[pool.n] = dead;
+  }
+
+  function emitRefPuff(stackX, stackY, heavy) {
+    const s = poolSpawn(refSmokePool, REF_CFG.SMOKE_MAX);
+    if (!s) return;
+    s.x = stackX + Math.random();
+    s.y = stackY;
+    s.vx = 0;
+    s.vy = -(heavy ? 26 : 16) - Math.random() * 8;
+    s.age = 0;
+    s.life = (heavy ? 3.2 : 2.2) + Math.random();
+    s.r0 = heavy ? 1.5 : 0.8;
+    s.grow = (heavy ? 2.4 : 1.6) + Math.random();
+    s.shade = heavy ? 0 : 1;
+  }
+
+  function refSwayOffset(i, swayPhase, speed) {
+    const k = Math.min(1, Math.abs(speed) / REF_CFG.CRUISE_SPEED);
+    if (k < 0.05) return 0;
+    const s = (Math.sin(swayPhase + i * 2.1) + 0.6 * Math.sin(swayPhase * 2.3 + i * 1.3)) * k;
+    return s > 1.05 ? -1 : s < -1.3 ? 1 : 0;
+  }
+
+  function drawRefBogie(g, p, a, b, yWheel) {
+    refRect(g, a - 3, yWheel - 1, b - a + 7, 1, p.gray);     // side frame
+    refRect(g, a - 2, yWheel, b - a + 5, 1, p.grayDark);
+    const m = (a + b) >> 1;
+    refRect(g, m - 1, yWheel - 4, 3, 3, p.ink);              // bolster spring
+    refPx(g, m, yWheel - 3, p.grayDark);
+  }
+
+  function drawRefHornWaves(g, p, hx, hy, clock) {
+    const ph = Math.floor(clock * 8) % 3;
+    for (let i = 0; i < 3; i++) {
+      if ((i + ph) % 3 === 2) continue;
+      const r = 2 + i * 3;
+      for (let a = -2; a <= 2; a++) {
+        refPx(g, hx + r + (Math.abs(a) === 2 ? -1 : 0), hy + a - i, p.white);
+      }
+    }
+  }
+
+  // ============================================================================
+  // 8C. AERIAL CURVED-TRACK TRAIN RENDERER USING REFERENCE 2D SPRITES (SCENES 1 & 5)
+  // ============================================================================
+  function drawAerialTrain(ctx, headParam, t, travelDir = -1, atm = null) {
+    ctx.save();
+    const wind = atm ? atm.wind : 0.25;
+    const isSunset = atm ? atm.sunsetAmt > 0.25 : false;
+    const v = isSunset ? REF_VARIANTS.dusk : REF_VARIANTS.day;
+    const p = v.p;
+
+    const wheelAngle = ((t * 80 / REF_CFG.WHEEL_R) % (Math.PI / 2) + (Math.PI / 2)) % (Math.PI / 2);
+    const frameIdx = Math.floor((wheelAngle / (Math.PI / 2)) * REF_CFG.WHEEL_FRAMES) % REF_CFG.WHEEL_FRAMES;
+    const wf = v.wheels[frameIdx] || v.wheels[0];
+    const swayPhase = t * 7.2;
+
+    const numCars = REF_CFG.CAR_COUNT; // 1 Loco + 5 Carriages (exact from Reference Code)
+    const carStep = 0.052;
+
+    const cars = [];
+    for (let i = 0; i <= numCars; i++) {
+      const u = headParam - travelDir * i * carStep;
+      if (u < 0.015 || u > 0.985) continue;
+      cars.push({ i, u });
+    }
+    // Sort furthest (largest u, smallest scale) to closest (smallest u, largest scale)
+    cars.sort((a, b) => b.u - a.u);
+
+    // 1. Couplers & Gangway Bellows between adjacent vehicles along the curve
+    for (let k = 0; k < cars.length; k++) {
+      const cur = cars[k];
+      if (cur.i >= numCars) continue;
+      const nextU = cur.u - travelDir * carStep;
+      if (nextU < 0.015 || nextU > 0.985) continue;
+      const pA = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, cur.u);
+      const pB = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, nextU);
+      const midScale = lerp(2.25, 0.42, (cur.u + nextU) * 0.5);
+
+      ctx.save();
+      ctx.strokeStyle = p.grayDark;
+      ctx.lineWidth = Math.max(2, 10 * midScale);
+      ctx.beginPath();
+      ctx.moveTo(pA.x, pA.y - 12 * midScale);
+      ctx.lineTo(pB.x, pB.y - 12 * midScale);
+      ctx.stroke();
+
+      ctx.strokeStyle = p.ink;
+      ctx.lineWidth = Math.max(1.5, 3 * midScale);
+      ctx.beginPath();
+      ctx.moveTo(pA.x, pA.y - 5 * midScale);
+      ctx.lineTo(pB.x, pB.y - 5 * midScale);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 2. Render each vehicle using exact Reference Code sprites (buildRefLoco, buildRefCar, buildRefWheels, drawRefBogie)
+    for (const car of cars) {
+      const pos = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, car.u);
+      const deriv = quadBezierDeriv(TRACK_P0, TRACK_P1, TRACK_P2, car.u);
+      const rawAngle = Math.atan2(deriv.dy * travelDir, deriv.dx * travelDir);
+      const spriteScale = lerp(2.25, 0.42, car.u);
+
+      // Keep the 2D train sprite upright (+Y down toward rails, -Y up toward sky)
+      const facingLeft = Math.cos(rawAngle) < 0;
+      const tiltAngle = facingLeft ? rawAngle - Math.PI : rawAngle;
+      const dirX = facingLeft ? -1 : 1;
+
+      const isLoco = car.i === 0;
+      const spr = isLoco ? v.loco : v.cars[car.i - 1];
+      const veh = REF_TRAIN.vehicles[car.i];
+      const sway = refSwayOffset(car.i, swayPhase, 80);
+
+      ctx.save();
+      ctx.translate(pos.x, pos.y);
+      ctx.rotate(tiltAngle);
+      ctx.scale(spriteScale * dirX, spriteScale);
+      ctx.imageSmoothingEnabled = false;
+
+      // Ground contact shadow on the ballast bed
+      ctx.fillStyle = "rgba(14, 12, 18, 0.42)";
+      ctx.fillRect(-veh.w * 0.52, -2, veh.w * 1.04, 6);
+
+      // Local origin: x = -veh.w / 2, rail top at y = 0 (which corresponds to y = 148 in Reference screen coords)
+      const ox = -Math.floor(veh.w / 2);
+      const oy = -148;
+
+      // Rotating 4-spoke wheels & bolster-spring bogies
+      for (const wx of veh.wheels) {
+        ctx.drawImage(wf, ox + wx - 3, oy + REF_LAYER_Y.wheel);
+      }
+      for (let k = 0; k < veh.wheels.length; k += 2) {
+        drawRefBogie(ctx, p, ox + veh.wheels[k], ox + veh.wheels[k + 1], oy + REF_LAYER_Y.wheel);
+      }
+
+      // Main Locomotive or Passenger Carriage Sprite with independent swayOffset
+      ctx.drawImage(spr, ox, oy + veh.y + sway);
+
+      // Visible horn sound waves when horn blows
+      if (isLoco && trainSim.hornWave > 0) {
+        drawRefHornWaves(ctx, p, ox + 42, oy + REF_LAYER_Y.loco + 1, t);
+      }
+
+      // Warm window halos & headlight cone from Reference Code GLOW
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      if (isLoco) {
+        ctx.globalAlpha = isSunset ? 0.92 : 0.55;
+        ctx.drawImage(REF_GLOW.cone, ox + REF_CFG.LOCO_W, oy + REF_LAYER_Y.loco);
+        ctx.drawImage(REF_GLOW.flare, ox + REF_CFG.LOCO_W - 8, oy + REF_LAYER_Y.loco - 3);
+        if (isSunset) {
+          ctx.drawImage(REF_GLOW.cabHalo, ox + 40 - 7, oy + REF_LAYER_Y.loco + 9 - 7);
+        }
+      } else if (isSunset) {
+        ctx.globalAlpha = 0.85;
+        for (let wIdx = 0; wIdx < 5; wIdx++) {
+          ctx.drawImage(REF_GLOW.small, ox + 9 + wIdx * 5 - 5, oy + REF_LAYER_Y.car + 6 - 5);
+        }
+      }
+      ctx.restore();
+
+      ctx.restore();
+
+      // 3. Bayer-dithered exhaust smoke puffs from locomotive roof stack (exact Reference Code puffSprite!)
+      if (isLoco) {
+        const stackU = clamp(car.u - travelDir * 0.008, 0.01, 0.99);
+        const pStack = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, stackU);
+        for (let s = 0; s < 18; s++) {
+          const sp = ((t * 0.95 + s / 18) % 1);
+          const trailU = clamp(stackU - travelDir * sp * 0.095, 0.01, 0.99);
+          const pTrail = quadBezier(TRACK_P0, TRACK_P1, TRACK_P2, trailU);
+          const r = Math.min(7, Math.floor(1.2 + sp * 5.8));
+          const dens = 16 - Math.min(3, Math.floor(sp * 4)) * 4;
+          const shade = Math.min(3, Math.floor(sp * 3.5));
+          const puff = refPuffSprite(v, r, dens, shade);
+
+          const sx = lerp(pStack.x, pTrail.x, 0.75) + sp * (24 + wind * 70) + Math.sin(t * 3.2 + s) * 6 * sp;
+          const sy = lerp(pStack.y, pTrail.y, 0.75) - (30 + sp * 95) * spriteScale;
+
+          ctx.save();
+          ctx.translate(sx, sy);
+          ctx.scale(spriteScale, spriteScale);
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(puff, -r, -r);
+          ctx.restore();
+        }
+      }
+    }
+
+    ctx.restore();
+  }
+
+  function drawAerialBirds(ctx, t) {
+    ctx.save();
+    for (let b = 0; b < 6; b++) {
+      const bx = (1350 + b * 145 + t * (42 + b * 5)) % WW;
+      const by = 420 + b * 75 + Math.sin(t * 2.2 + b) * 18;
+      const wing = Math.sin(t * 9.5 + b * 1.4) * 9;
+      ctx.strokeStyle = "#f8f9fa";
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(bx - 10, by - wing);
+      ctx.quadraticCurveTo(bx - 3, by, bx, by);
+      ctx.quadraticCurveTo(bx + 3, by, bx + 10, by - wing);
+      ctx.stroke();
+    }
+
+    const kx = 1760 + Math.sin(t * 1.4) * 165;
+    const ky = 720 + Math.cos(t * 1.9) * 85;
+    const kWing = Math.sin(t * 18) * 7;
+    ctx.fillStyle = "#00a8cc";
+    ctx.beginPath();
+    ctx.ellipse(kx, ky, 7.5, 3.8, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#e67e22";
+    ctx.beginPath();
+    ctx.arc(kx + 4, ky + 1, 3.0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#22d3ee";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(kx - 5, ky - kWing);
+    ctx.lineTo(kx + 5, ky + kWing);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ============================================================================
+  // 9. SCENE 4: GROUND CUT — THE AFTERNOON EXPRESS (1:10–1:45)
+  //    Direct integration of Reference Code's 2D Intercity Train, Track,
+  //    Telegraph Poles, Bayer-Dithered Smoke Pool, Sparks & Glow
+  // ============================================================================
+  function renderGroundScene(ctx, t, cam, state, atm) {
+    ctx.save();
+    ctx.translate(CW * 0.5, CH * 0.5);
+    ctx.scale(cam.zoom, cam.zoom);
+    ctx.translate(-cam.cx, -cam.cy);
+
+    ctx.drawImage(groundStaticCanvas, 0, 0);
+
+    const gust = (t >= 49.0 && t <= 78.0)
+      ? Math.sin(clamp((t - 49.0) / 29.0, 0, 1) * Math.PI) * (0.78 + 0.22 * Math.sin(t * 19))
+      : 0;
+    state.windGust = gust;
+
+    drawGroundBackgroundActivity(ctx, t, atm);
+    drawGroundPerspectiveTrain(ctx, t, gust);
+    drawGroundForegroundBananaFoliage(ctx, t, gust);
+
+    ctx.restore();
+  }
+
+  function drawGroundBackgroundActivity(ctx, t, atm) {
+    ctx.save();
+    // Gentle parallax scroll while the camera tracks alongside the Intercity Express (50.5s..71.0s)
+    const trackCamScroll = (t <= 50.5) ? 0 : (t <= 71.0 ? (t - 50.5) * 28 : 20.5 * 28);
+    const ox = -((trackCamScroll * 0.35) % 420);
+
+    // Alert Deshi Zebu Cow & Waving Village Children by the embankment
+    const headLift = smoothstep(46.5, 49.5, t) * 7;
+    ctx.fillStyle = "#a85a2e";
+    ctx.beginPath();
+    ctx.roundRect(540 + ox, 470, 26, 13, 4);
+    ctx.fill();
+    ctx.fillRect(562 + ox, 464 - headLift, 9, 9);
+
+    const roles = ["childBoy", "childGirl", "boy"];
+    roles.forEach((role, i) => {
+      drawPerson(ctx, {
+        x: 610 + i * 22 + ox, y: 492, scale: 0.52, dir: 1,
+        walkPhase: t * 8 + i, isWalking: false, breathe: Math.sin(t * 3),
+        wind: atm.wind, role, armReach: -2.1 + Math.sin(t * 14 + i) * 0.45, timeSec: t
+      });
+    });
+
+    // Startled flock of birds rising when the first two-tone horn blasts at 46.8s
+    if (t >= 46.8 && t <= 59.0) {
+      const bt = t - 46.8;
+      for (let b = 0; b < 14; b++) {
+        const bx = 660 + (b - 5) * 28 + bt * (48 + (b % 4) * 18);
+        const by = 485 - bt * (36 + (b % 3) * 14) - Math.sin(bt * 4 + b) * 12;
+        const wing = Math.sin(t * 22 + b) * 7;
+        ctx.strokeStyle = "#263238";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(bx - 7, by - wing);
+        ctx.lineTo(bx, by);
+        ctx.lineTo(bx + 7, by - wing);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawGroundPerspectiveTrain(ctx, t, gust) {
+    // We render in the Reference Code's crisp pixel coordinate space scaled 4.5x onto the 1600x900 canvas
+    // so the 2D Intercity Train, Telegraph Poles, Catenary Wires, Sleepers, Rails, Smoke & Sparks
+    // have the exact proportions and crispness of 'Intercity Pixel Train'!
+    const SCALE = 4.5;
+    const VIRTUAL_W = Math.ceil(CW / SCALE); // 356 virtual px wide
+    const BASE_Y_OFFSET = -26;               // places track at y = (140 - 26) * 4.5 = 513..603 on 1600x900 canvas
+
+    // Compute dt for particle pools (handles scrubbing smoothly)
+    let dt = (trainSim.lastT >= 0 && t >= trainSim.lastT && (t - trainSim.lastT) < 0.25)
+      ? (t - trainSim.lastT)
+      : (1 / 60);
+    if (trainSim.lastT < 0 || Math.abs(t - trainSim.lastT) > 0.5) {
+      refSmokePool.n = 0;
+      refSparkPool.n = 0;
+    }
+    trainSim.lastT = t;
+
+    // Choreograph the 3 phases of Scene 3 Ground Cut (45s..80s):
+    // 1) 45.0s..50.5s: Train enters from left (frontX moves from -15 to REF_CFG.TRAIN_FRONT_X = 273)
+    // 2) 50.5s..71.0s: Camera tracks alongside the speeding Intercity rake at REF_CFG.TRAIN_FRONT_X = 273
+    //                  while track, sleepers & telegraph poles scroll past at CRUISE_SPEED = 80!
+    // 3) 71.0s..80.0s: Camera stops by the banana grove while the rake speeds off to the right (frontX -> 560)
+    const V = REF_CFG.CRUISE_SPEED; // 80 virtual px/s
+    let frontX = REF_CFG.TRAIN_FRONT_X;
+    let camScrollDist = 0;
+
+    if (t < 50.5) {
+      const u = clamp((t - 45.2) / 5.3, 0, 1);
+      frontX = lerp(-15, REF_CFG.TRAIN_FRONT_X, easeInOutCubic(u));
+      camScrollDist = 0;
+      trainSim.speed = V * smoothstep(0, 1, u);
+    } else if (t <= 71.0) {
+      frontX = REF_CFG.TRAIN_FRONT_X;
+      camScrollDist = (t - 50.5) * V;
+      trainSim.speed = V;
+    } else {
+      const u = clamp((t - 71.0) / 8.5, 0, 1);
+      frontX = lerp(REF_CFG.TRAIN_FRONT_X, VIRTUAL_W + REF_TRAIN.totalLen + 45, u);
+      camScrollDist = (71.0 - 50.5) * V + (1 - u * 0.7) * (t - 71.0) * 18;
+      trainSim.speed = V;
+    }
+
+    const shiftX = frontX - REF_CFG.TRAIN_FRONT_X;
+    trainSim.dist = camScrollDist;
+    const turn = Math.PI / 2;
+    trainSim.wheelAngle = ((t * V / REF_CFG.WHEEL_R) % turn + turn) % turn;
+    trainSim.swayPhase = t * V * 0.09;
+    trainSim.hornWave = Math.max(0, trainSim.hornWave - dt);
+
+    // Update Reference Code Exhaust Smoke Pool
+    const stackX = REF_TRAIN.stackX + shiftX;
+    const stackY = REF_TRAIN.stackY;
+    const revving = trainSim.hornWave > 0 || t < 51.5;
+    const smokeRate = (frontX > -20 && frontX - REF_TRAIN.totalLen < VIRTUAL_W + 40) ? (revving ? 12 : 6.5) : 0;
+    trainSim.smokeAcc += smokeRate * dt;
+    while (trainSim.smokeAcc >= 1) {
+      trainSim.smokeAcc -= 1;
+      emitRefPuff(stackX, stackY, revving);
+    }
+    const windX = -(V + 4);
+    const kx = Math.min(1, dt * 2.2);
+    const ky = Math.min(1, dt * 1.5);
+    for (let i = 0; i < refSmokePool.n; ) {
+      const s = refSmokePool.items[i];
+      s.age += dt;
+      s.vx += (windX - s.vx) * kx;
+      s.vy += (-5 - s.vy) * ky;
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      if (s.age < s.life && s.x > -24 && s.x < VIRTUAL_W + 48 && s.y > -24) i++;
+      else poolKill(refSmokePool, i);
+    }
+
+    // Update Reference Code Wheel Sparks Pool
+    const sparkRate = (frontX > 20 && frontX - REF_TRAIN.totalLen < VIRTUAL_W) ? 18 : 0;
+    trainSim.sparkAcc += sparkRate * dt;
+    while (trainSim.sparkAcc >= 1) {
+      trainSim.sparkAcc -= 1;
+      const spk = poolSpawn(refSparkPool, REF_CFG.SPARK_MAX);
+      if (!spk) break;
+      const veh = REF_TRAIN.vehicles[(Math.random() * REF_TRAIN.vehicles.length) | 0];
+      spk.x = veh.x + shiftX + veh.wheels[(Math.random() * 4) | 0];
+      spk.y = REF_LAYER_Y.wheel + 6;
+      spk.vx = -(20 + Math.random() * 50);
+      spk.vy = -(15 + Math.random() * 45);
+      spk.age = 0;
+      spk.life = 0.15 + Math.random() * 0.3;
+    }
+    for (let i = 0; i < refSparkPool.n; ) {
+      const s = refSparkPool.items[i];
+      s.age += dt;
+      s.vy += 220 * dt;
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      if (s.age < s.life) i++;
+      else poolKill(refSparkPool, i);
+    }
+
+    // Render in Reference Pixel Space (scaled by SCALE = 4.5 with crisp nearest-neighbor pixels!)
+    const v = REF_VARIANTS.day;
+    const p = v.p;
+
+    ctx.save();
+    ctx.scale(SCALE, SCALE);
+    ctx.translate(0, BASE_Y_OFFSET);
+    ctx.imageSmoothingEnabled = false;
+
+    // 1. Tile Telegraph Poles with Sagging Wires & Track Ballast/Sleepers/Rails (exact Reference Code drawTiled)
+    const drawRefTiled = (tile, offset, y) => {
+      const tw = tile.width;
+      for (let x = -(((Math.floor(offset) % tw) + tw) % tw); x < VIRTUAL_W; x += tw) {
+        ctx.drawImage(tile, x, y);
+      }
+    };
+    drawRefTiled(v.poles, camScrollDist, REF_LAYER_Y.poles);
+    drawRefTiled(v.track, camScrollDist, REF_LAYER_Y.track);
+
+    // 2. Draw Couplings (behind bodies): gangway bellows between carriages + lower coupler bar
+    const vehicles = REF_TRAIN.vehicles;
+    for (let i = 0; i < vehicles.length - 1; i++) {
+      const gx = Math.round(vehicles[i + 1].x + shiftX + vehicles[i + 1].w);
+      if (i > 0) refRect(ctx, gx, 125, REF_CFG.CAR_GAP, 11, p.grayDark);
+      refRect(ctx, gx - 1, 137, REF_CFG.CAR_GAP + 2, 1, p.ink);
+    }
+
+    // 3. Draw Rotating 4-Spoke Wheels, Bolster-Spring Bogies & Locomotive/Carriage Bodies
+    const totalFrames = REF_CFG.WHEEL_FRAMES;
+    const frameIdx = ((Math.floor((trainSim.wheelAngle / (Math.PI / 2)) * totalFrames) % totalFrames) + totalFrames) % totalFrames;
+    const wf = v.wheels[frameIdx] || v.wheels[0];
+
+    vehicles.forEach((veh, i) => {
+      const vx = Math.round(veh.x + shiftX);
+      if (vx + veh.w < -10 || vx > VIRTUAL_W + 10) return;
+      for (const wx of veh.wheels) {
+        ctx.drawImage(wf, vx + wx - 3, REF_LAYER_Y.wheel);
+      }
+      for (let k = 0; k < veh.wheels.length; k += 2) {
+        drawRefBogie(ctx, p, vx + veh.wheels[k], vx + veh.wheels[k + 1], REF_LAYER_Y.wheel);
+      }
+      const sway = refSwayOffset(i, trainSim.swayPhase, trainSim.speed);
+      ctx.drawImage(i === 0 ? v.loco : v.cars[i - 1], vx, veh.y + sway);
+    });
+
+    // 4. Draw Horn Sound Waves when horn is blowing (exact from Reference Code)
+    if (trainSim.hornWave > 0) {
+      const hx = Math.round(vehicles[0].x + shiftX + 42);
+      const hy = REF_LAYER_Y.loco + 1;
+      drawRefHornWaves(ctx, p, hx, hy, t);
+    }
+
+    // 5. Draw Bayer-Dithered Exhaust Smoke Puffs (exact from Reference Code)
+    for (let i = 0; i < refSmokePool.n; i++) {
+      const s = refSmokePool.items[i];
+      const u = s.age / s.life;
+      const r = Math.min(7, Math.floor(s.r0 + s.age * s.grow));
+      const dens = 16 - Math.min(3, Math.floor(u * 4)) * 4;
+      const shade = Math.min(3, s.shade + Math.floor(u * 3));
+      ctx.drawImage(refPuffSprite(v, r, dens, shade), Math.round(s.x) - r, Math.round(s.y) - r);
+    }
+
+    // 6. Draw Headlight Cone, Flare & Wheel Sparks (exact from Reference Code drawGlow)
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const headScreenX = Math.round(REF_CFG.TRAIN_FRONT_X + shiftX);
+    if (headScreenX > -20 && headScreenX < VIRTUAL_W + 60) {
+      ctx.globalAlpha = 0.72;
+      ctx.drawImage(REF_GLOW.cone, headScreenX, REF_LAYER_Y.loco);
+      ctx.drawImage(REF_GLOW.flare, headScreenX - 8, REF_LAYER_Y.loco - 3);
+    }
+    ctx.globalAlpha = 1;
+    for (let i = 0; i < refSparkPool.n; i++) {
+      const s = refSparkPool.items[i];
+      const x = Math.round(s.x);
+      const y = Math.round(s.y);
+      const k = s.age / s.life;
+      ctx.drawImage(REF_GLOW.spark, x - 3, y - 3);
+      ctx.fillStyle = k < 0.3 ? REF_PALETTE.white : k < 0.7 ? REF_PALETTE.glow : REF_PALETTE.amber;
+      ctx.fillRect(x, y, 1, 1);
+      ctx.fillRect(Math.round(s.x - s.vx * 0.015), Math.round(s.y - s.vy * 0.015), 1, 1);
+    }
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  function drawGroundForegroundBananaFoliage(ctx, t, gust) {
+    ctx.save();
+    const baseSway = Math.sin(t * 2.1) * 0.035 + gust * 0.22;
+
+    const midLeaves = [
+      { x: 390, y: 460, len: 195, ang: -0.65 },
+      { x: 425, y: 470, len: 180, ang: -0.22 },
+      { x: 445, y: 490, len: 165, ang: 0.15 },
+      { x: 340, y: 440, len: 210, ang: -1.1 }
+    ];
+    midLeaves.forEach((ml, i) => {
+      ctx.save();
+      ctx.translate(ml.x, ml.y);
+      ctx.rotate(ml.ang + baseSway * (0.8 + i * 0.15));
+      ctx.fillStyle = i % 2 === 0 ? "#4d8728" : "#67a636";
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(ml.len * 0.5, -26, ml.len, -6);
+      ctx.quadraticCurveTo(ml.len * 0.5, 26, 0, 0);
+      ctx.fill();
+      ctx.strokeStyle = "#b4cc66";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(ml.len * 0.95, -4);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // Fibrous Banana Trunks on Left Foreground
+    ctx.save();
+    const trunkGrad1 = ctx.createLinearGradient(140, 0, 390, CH);
+    trunkGrad1.addColorStop(0, "#4c6b28");
+    trunkGrad1.addColorStop(0.45, "#6e5c3e");
+    trunkGrad1.addColorStop(1, "#3d2e1e");
+    ctx.fillStyle = trunkGrad1;
+    ctx.beginPath();
+    ctx.moveTo(310, -20);
+    ctx.lineTo(445, -20);
+    ctx.quadraticCurveTo(340, 450, 260, CH);
+    ctx.lineTo(105, CH);
+    ctx.quadraticCurveTo(215, 450, 310, -20);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = "rgba(32, 24, 16, 0.55)";
+    ctx.lineWidth = 3;
+    for (let s = 0; s < 14; s++) {
+      const ox = s * 11;
+      ctx.beginPath();
+      ctx.moveTo(315 + ox, 0);
+      ctx.quadraticCurveTo(225 + ox, 450, 120 + ox, CH);
+      ctx.stroke();
+    }
+
+    const trunkGrad2 = ctx.createLinearGradient(0, 0, 145, CH);
+    trunkGrad2.addColorStop(0, "#3b591c");
+    trunkGrad2.addColorStop(0.6, "#574a2e");
+    trunkGrad2.addColorStop(1, "#2b2015");
+    ctx.fillStyle = trunkGrad2;
+    ctx.beginPath();
+    ctx.moveTo(-20, -20);
+    ctx.lineTo(135, -20);
+    ctx.quadraticCurveTo(85, 450, 28, CH);
+    ctx.lineTo(-20, CH);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    const dryBaseLeaves = [
+      { x: 95,  y: 780, w: 185, h: 95,  ang: -0.35 },
+      { x: 180, y: 690, w: 160, h: 75,  ang: 0.25 },
+      { x: 265, y: 845, w: 220, h: 85,  ang: -0.15 },
+      { x: 760, y: 790, w: 260, h: 55,  ang: 0.08 }
+    ];
+    dryBaseLeaves.forEach((dl, i) => {
+      ctx.save();
+      ctx.translate(dl.x, dl.y);
+      ctx.rotate(dl.ang + gust * 0.08 * (i % 2 === 0 ? 1 : -1));
+      const dGrad = ctx.createLinearGradient(0, -dl.h * 0.5, dl.w, dl.h * 0.5);
+      dGrad.addColorStop(0, "#9c7c54");
+      dGrad.addColorStop(0.6, "#755838");
+      dGrad.addColorStop(1, "#4a3520");
+      ctx.fillStyle = dGrad;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(dl.w * 0.5, -dl.h, dl.w, -dl.h * 0.2);
+      ctx.quadraticCurveTo(dl.w * 0.6, dl.h * 0.6, 0, 0);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    for (let r = 0; r < 6; r++) {
+      const rx = 665 + r * 18;
+      const rLen = 240 + (r % 3) * 65;
+      const whip = Math.sin(t * 3.2 + r) * 14 + gust * (85 + r * 12);
+      ctx.strokeStyle = r % 2 === 0 ? "#5c4028" : "#7c5836";
+      ctx.lineWidth = 10 - r;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(rx, -10);
+      ctx.quadraticCurveTo(rx + whip * 0.45, rLen * 0.5, rx + whip, rLen);
+      ctx.stroke();
+    }
+
+    function drawDetailedBananaFrond(ox, oy, length, baseAngle, flipY) {
+      ctx.save();
+      ctx.translate(ox, oy);
+      const frondBend = baseAngle + baseSway * 1.15;
+      ctx.rotate(frondBend);
+      ctx.scale(1, flipY ? -1 : 1);
+
+      ctx.strokeStyle = "#b4cc66";
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(length * 0.5, -18, length, 8);
+      ctx.stroke();
+
+      const numSegs = 14;
+      for (let s = 0; s < numSegs; s++) {
+        const u0 = s / numSegs;
+        const u1 = (s + 0.86) / numSegs;
+        const sx0 = u0 * length;
+        const sx1 = u1 * length;
+        const flutter = Math.sin(t * 14 + s * 1.3) * (2 + gust * 14);
+        const segW = Math.sin(u0 * Math.PI) * 95 + 25;
+
+        const bladeGrad = ctx.createLinearGradient(sx0, 0, sx0, -segW);
+        bladeGrad.addColorStop(0, "#3b731e");
+        bladeGrad.addColorStop(0.7, "#5ea130");
+        bladeGrad.addColorStop(1, s % 4 === 0 ? "#9c7834" : "#7ec242");
+        ctx.fillStyle = bladeGrad;
+        ctx.beginPath();
+        ctx.moveTo(sx0, -4);
+        ctx.lineTo(sx1, -4);
+        ctx.lineTo(sx1 + 18 + flutter, -segW);
+        ctx.lineTo(sx0 + 14 + flutter, -segW * 0.95);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = "#316118";
+        ctx.beginPath();
+        ctx.moveTo(sx0, 4);
+        ctx.lineTo(sx1, 4);
+        ctx.lineTo(sx1 + 15 + flutter, segW * 0.65);
+        ctx.lineTo(sx0 + 11 + flutter, segW * 0.6);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    drawDetailedBananaFrond(190, 45, 490, 0.32, false);
+    drawDetailedBananaFrond(390, -15, 460, 0.78, false);
+    drawDetailedBananaFrond(740, -25, 480, 0.85, false);
+    drawDetailedBananaFrond(960, -35, 460, 0.62, false);
+
+    // Foreground Grass & Heart-shaped Taro Leaves (Kochu Pata)
+    for (let g = 0; g < 65; g++) {
+      const gx = (g * 27) % CW;
+      const gy = CH + 5;
+      const gh = 45 + (g % 5) * 24;
+      const bend = Math.sin(t * 3.1 + g * 0.5) * 12 + gust * 68;
+      ctx.strokeStyle = g % 3 === 0 ? "#587d3b" : "#3a5725";
+      ctx.lineWidth = 3.2;
+      ctx.beginPath();
+      ctx.moveTo(gx, gy);
+      ctx.quadraticCurveTo(gx + bend * 0.4, gy - gh * 0.5, gx + bend, gy - gh);
+      ctx.stroke();
+
+      if (g % 9 === 0 && gx < 820) {
+        ctx.save();
+        ctx.translate(gx + bend * 0.7, gy - gh * 0.65);
+        ctx.rotate(0.2 + gust * 0.25);
+        ctx.fillStyle = "#3d6628";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 18, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#6b9445";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(-14, 0);
+        ctx.lineTo(14, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    if (gust > 0.05) {
+      for (let p = 0; p < 22; p++) {
+        const px = ((t * (520 + p * 35) + p * 130) % (CW + 200)) - 100;
+        const py = 460 + ((p * 67) % 410) + Math.sin(t * 11 + p) * 28;
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(t * 14 + p);
+        ctx.fillStyle = p % 2 === 0 ? "#587d3b" : "#926c44";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 11, 4.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    ctx.restore();
+  }
+
+  // ============================================================================
+  // 10. POST-PROCESSING: MIST, GOD RAYS, COLOR GRADING, GRAIN & TITLE CARDS
+  // ============================================================================
+  function renderPostProcessingAndTitles(ctx, t, cam, atm) {
+    const { pal, mist, sunsetAmt } = atm;
+    ctx.save();
+
+    if (mist > 0.01 && cam.mode === "aerial") {
+      ctx.save();
+      for (let m = 0; m < 4; m++) {
+        const my = 180 + m * 145;
+        const mGrad = ctx.createLinearGradient(0, my - 45, 0, my + 45);
+        mGrad.addColorStop(0, "rgba(252, 236, 214, 0)");
+        mGrad.addColorStop(0.5, `rgba(252, 236, 214, ${mist * (0.22 - m * 0.03)})`);
+        mGrad.addColorStop(1, "rgba(252, 236, 214, 0)");
+        ctx.fillStyle = mGrad;
+        ctx.fillRect(0, my - 45, CW, 90);
+      }
+      ctx.restore();
+    }
+
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+    const rayAlpha = cam.mode === "ground" ? 0.09 : (0.12 + sunsetAmt * 0.14);
+    for (let r = 0; r < 6; r++) {
+      const rx = 220 + r * 250 + Math.sin(t * 0.25 + r) * 35;
+      const grad = ctx.createLinearGradient(rx, 0, rx + 260, CH);
+      grad.addColorStop(0, `rgba(255, 230, 168, ${rayAlpha})`);
+      grad.addColorStop(0.65, `rgba(255, 205, 130, ${rayAlpha * 0.38})`);
+      grad.addColorStop(1, "rgba(255, 190, 110, 0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(rx - 85, 0);
+      ctx.lineTo(rx + 85, 0);
+      ctx.lineTo(rx + 410, CH);
+      ctx.lineTo(rx + 105, CH);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    if (sunsetAmt > 0.01) {
+      ctx.save();
+      const sunGrad = ctx.createLinearGradient(0, 0, 0, CH);
+      sunGrad.addColorStop(0, `rgba(199, 107, 85, ${sunsetAmt * 0.34})`);
+      sunGrad.addColorStop(0.5, `rgba(248, 196, 113, ${sunsetAmt * 0.24})`);
+      sunGrad.addColorStop(1, `rgba(44, 58, 66, ${sunsetAmt * 0.32})`);
+      ctx.fillStyle = sunGrad;
+      ctx.fillRect(0, 0, CW, CH);
+      ctx.restore();
+    }
+
+    if (pal.shadowAlpha > 0.02) {
+      ctx.fillStyle = `rgba(14, 20, 34, ${pal.shadowAlpha * 0.65})`;
+      ctx.fillRect(0, 0, CW, CH);
+    }
+
+    const vig = ctx.createRadialGradient(CW * 0.5, CH * 0.5, CW * 0.34, CW * 0.5, CH * 0.5, CW * 0.72);
+    vig.addColorStop(0, "rgba(28, 18, 10, 0)");
+    vig.addColorStop(0.7, "rgba(22, 14, 8, 0.14)");
+    vig.addColorStop(1, "rgba(10, 7, 5, 0.56)");
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, CW, CH);
+
+    const ox = Math.floor((t * 24) % 9) * 19;
+    const oy = Math.floor((t * 17) % 9) * 23;
+    const pat = ctx.createPattern(grainCanvas, "repeat");
+    if (pat) {
+      ctx.save();
+      ctx.translate(ox, oy);
+      ctx.fillStyle = pat;
+      ctx.fillRect(-ox, -oy, CW + 180, CH + 180);
+      ctx.restore();
+    }
+
+    if (cam.cutFade > 0.01) {
+      ctx.fillStyle = `rgba(13, 12, 10, ${cam.cutFade * 0.85})`;
+      ctx.fillRect(0, 0, CW, CH);
+    }
+
+    if (t >= 1.2 && t <= 11.2) {
+      const alpha = smoothstep(1.2, 3.2, t) * (1 - smoothstep(8.8, 11.2, t));
+      drawCinemaTitleCard(ctx, "ফেলে আসা গ্রাম", "Gram Bangla — Whispers of the Paddy Wind", alpha);
+    }
+
+    if (t >= 88.5) {
+      const alpha = smoothstep(88.5, 91.5, t);
+      drawCinemaTitleCard(ctx, "সমাপ্ত", "A 1990s Bengali Village Memory", alpha);
+    }
+
+    ctx.restore();
+  }
+
+  function drawCinemaTitleCard(ctx, bnText, subText, alpha) {
+    if (alpha <= 0.005) return;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const cx = CW * 0.5;
+    const cy = CH * 0.28;
+    const titleSize = 54;
+
+    ctx.shadowColor = "rgba(24, 14, 6, 0.78)";
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 3;
+
+    ctx.fillStyle = "#fff5e1";
+    ctx.font = `600 ${titleSize}px "Noto Serif Bengali", "SolaimanLipi", "Bangla Sangam MN", Georgia, serif`;
+    ctx.fillText(bnText, cx, cy);
+
+    ctx.shadowBlur = 6;
+    ctx.strokeStyle = "rgba(245, 203, 134, 0.85)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - titleSize * 2.1, cy + titleSize * 0.65);
+    ctx.quadraticCurveTo(cx, cy + titleSize * 0.78, cx + titleSize * 2.1, cy + titleSize * 0.62);
+    ctx.stroke();
+
+    ctx.font = '400 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Georgia, serif';
+    ctx.fillStyle = "rgba(255, 238, 208, 0.92)";
+    ctx.fillText(subText, cx, cy + titleSize * 1.15);
+
+    ctx.restore();
+  }
+
+  // ============================================================================
+  // 11. MAIN APPLICATION LOOP & UI CONTROLS
+  // ============================================================================
+  const canvas = document.getElementById("film-canvas");
+  const ctx = canvas.getContext("2d");
+  const startOverlay = document.getElementById("start-overlay");
+  const tapStartBtn = document.getElementById("tap-start-btn");
+  const playPauseBtn = document.getElementById("play-pause-btn");
+  const playIcon = document.getElementById("play-icon");
+  const playLabel = document.getElementById("play-label");
+  const restartBtn = document.getElementById("restart-btn");
+  const muteBtn = document.getElementById("mute-btn");
+  const muteLabel = document.getElementById("mute-label");
+  const volumeSlider = document.getElementById("volume-slider");
+  const timelineSlider = document.getElementById("timeline-slider");
+  const timeDisplay = document.getElementById("time-display");
+  const sceneLabel = document.getElementById("scene-label");
+  const statusDot = document.getElementById("status-dot");
+  const fullscreenBtn = document.getElementById("fullscreen-btn");
+  const viewport = document.getElementById("viewport");
+  const sceneButtons = Array.from(document.querySelectorAll(".scene-jump-btn"));
+
+  const sound = new SoundEngine();
+  const appState = {
+    started: false,
+    playing: false,
+    currentTime: 0.0,
+    lastFrameTs: 0,
+    windGust: 0,
+    isScrubbing: false
+  };
+
+  function formatMMSS(sec) {
+    const s = Math.floor(clamp(sec, 0, TOTAL_DURATION));
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    return `${m}:${rem < 10 ? "0" + rem : rem}`;
+  }
+
+  function updateUIControls() {
+    if (!appState.isScrubbing) {
+      timelineSlider.value = appState.currentTime.toFixed(2);
+    }
+    timeDisplay.textContent = `${formatMMSS(appState.currentTime)} / 1:40`;
+
+    let currentScene = SCENES[0];
+    for (const sc of SCENES) {
+      if (appState.currentTime >= sc.start && appState.currentTime <= sc.end) {
+        currentScene = sc;
+        break;
+      }
+    }
+    sceneLabel.textContent = currentScene.title;
+    sceneButtons.forEach((btn, idx) => {
+      btn.classList.toggle("active", SCENES[idx].id === currentScene.id);
+    });
+
+    if (appState.playing) {
+      playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+      playLabel.textContent = "Pause";
+      statusDot.style.background = "#ffd996";
+    } else {
+      playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      playLabel.textContent = "Play";
+      statusDot.style.background = "#e59866";
+    }
+  }
+
+  function renderFrame(t) {
+    const cam = getCameraState(t);
+    const atm = computeAtmosphere(t);
+    ctx.clearRect(0, 0, CW, CH);
+    if (cam.mode === "ground") {
+      renderGroundScene(ctx, t, cam, appState, atm);
+    } else {
+      appState.windGust = 0;
+      renderAerialScene(ctx, t, cam, atm);
+    }
+    renderPostProcessingAndTitles(ctx, t, cam, atm);
+  }
+
+  function tick(ts) {
+    if (!appState.lastFrameTs) appState.lastFrameTs = ts;
+    const rawDt = (ts - appState.lastFrameTs) / 1000;
+    appState.lastFrameTs = ts;
+    const dt = clamp(rawDt, 0.001, 0.1);
+
+    if (appState.playing && !appState.isScrubbing) {
+      appState.currentTime += dt;
+      if (appState.currentTime >= TOTAL_DURATION) {
+        appState.currentTime = TOTAL_DURATION;
+        appState.playing = false;
+        sound.pause();
+      }
+      sound.update(appState.currentTime, dt, appState);
+    }
+
+    renderFrame(appState.currentTime);
+    updateUIControls();
+    requestAnimationFrame(tick);
+  }
+
+  function startExperience() {
+    sound.init();
+    sound.resume();
+    appState.started = true;
+    if (appState.currentTime >= TOTAL_DURATION - 0.2) {
+      appState.currentTime = 0;
+      sound.resetCues(0);
+    }
+    appState.playing = true;
+    startOverlay.classList.add("hidden");
+    updateUIControls();
+  }
+
+  function togglePlayPause() {
+    if (!appState.started) {
+      startExperience();
+      return;
+    }
+    if (appState.playing) {
+      appState.playing = false;
+      sound.pause();
+    } else {
+      if (appState.currentTime >= TOTAL_DURATION - 0.1) {
+        appState.currentTime = 0;
+        sound.resetCues(0);
+      }
+      appState.playing = true;
+      sound.init();
+      sound.resume();
+    }
+    updateUIControls();
+  }
+
+  function seekTo(newTime) {
+    appState.currentTime = clamp(newTime, 0, TOTAL_DURATION);
+    sound.resetCues(appState.currentTime);
+    renderFrame(appState.currentTime);
+    updateUIControls();
+  }
+
+  tapStartBtn.addEventListener("click", startExperience);
+  canvas.addEventListener("click", togglePlayPause);
+  playPauseBtn.addEventListener("click", togglePlayPause);
+
+  restartBtn.addEventListener("click", () => {
+    sound.init();
+    seekTo(0);
+    appState.playing = true;
+    appState.started = true;
+    startOverlay.classList.add("hidden");
+    sound.resume();
+    updateUIControls();
+  });
+
+  muteBtn.addEventListener("click", () => {
+    const muted = sound.toggleMute();
+    muteLabel.textContent = muted ? "Muted" : "Audio";
+    document.getElementById("vol-icon").innerHTML = muted
+      ? '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>'
+      : '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+  });
+
+  volumeSlider.addEventListener("input", (e) => {
+    const val = parseFloat(e.target.value);
+    if (sound.isMuted && val > 0) {
+      sound.toggleMute();
+      muteLabel.textContent = "Audio";
+    }
+    sound.setVolume(val);
+  });
+
+  timelineSlider.addEventListener("mousedown", () => { appState.isScrubbing = true; });
+  timelineSlider.addEventListener("touchstart", () => { appState.isScrubbing = true; }, { passive: true });
+  timelineSlider.addEventListener("input", (e) => {
+    seekTo(parseFloat(e.target.value));
+  });
+  timelineSlider.addEventListener("change", (e) => {
+    appState.isScrubbing = false;
+    seekTo(parseFloat(e.target.value));
+  });
+  window.addEventListener("mouseup", () => { appState.isScrubbing = false; });
+  window.addEventListener("touchend", () => { appState.isScrubbing = false; });
+
+  sceneButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const targetTime = parseFloat(btn.getAttribute("data-time") || "0");
+      sound.init();
+      startOverlay.classList.add("hidden");
+      appState.started = true;
+      appState.playing = true;
+      seekTo(targetTime);
+      sound.resume();
+    });
+  });
+
+  fullscreenBtn.addEventListener("click", () => {
+    const elem = document.getElementById("stage-wrapper");
+    if (!document.fullscreenElement) {
+      if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    }
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space") {
+      e.preventDefault();
+      togglePlayPause();
+    } else if (e.code === "KeyM") {
+      muteBtn.click();
+    } else if (e.code === "KeyF") {
+      fullscreenBtn.click();
+    } else if (e.code === "ArrowRight") {
+      seekTo(appState.currentTime + 5);
+    } else if (e.code === "ArrowLeft") {
+      seekTo(appState.currentTime - 5);
+    }
+  });
+
+  let idleTimer = null;
+  function resetIdleTimer() {
+    viewport.classList.remove("idle-cursor");
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      if (appState.playing) viewport.classList.add("idle-cursor");
+    }, 3200);
+  }
+  viewport.addEventListener("mousemove", resetIdleTimer);
+  viewport.addEventListener("touchstart", resetIdleTimer, { passive: true });
+
+  window.addEventListener("load", () => {
+    preRenderAllLayers();
+    renderFrame(0);
+    updateUIControls();
+    requestAnimationFrame(tick);
+  });
+})();
+</script>
+</body>
+</html>
