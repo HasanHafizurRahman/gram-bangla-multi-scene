@@ -1697,6 +1697,7 @@
   const banyanCanopyB = createPainterlyCanopySprite(240, 175, 502, ["#132516", "#1d3820", "#2a4d2c", "#3d6939", "#618c4c"], "banyan");
   const mangoCanopySprite = createPainterlyCanopySprite(210, 165, 601, ["#142615", "#1f3b1e", "#2e5429", "#467335", "#7d6b38"], "mango");
   const jackfruitCanopySprite = createPainterlyCanopySprite(220, 170, 701, ["#102112", "#19331b", "#244725", "#346131", "#4d7a3e"], "banyan");
+  const krishnachuraCanopySprite = createPainterlyCanopySprite(245, 175, 801, ["#152413", "#28451c", "#8c2414", "#d63819", "#fa6229"], "mango");
 
   const horizonCanvas = createOffscreen(WW, 260);
   const aerialWorldCanvas = createOffscreen(WW, WH);
@@ -2274,6 +2275,273 @@
     ctx.restore();
   }
 
+  // Detailed Ground-Perspective Trees beside the Railway Line (Scene 3)
+  function drawGroundBetelPalm(ctx, x, y, h, lean, scale = 1, sway = 0) {
+    ctx.save();
+    const topX = x + lean + sway;
+    const topY = y - h;
+    const ctrlX = x + lean * 0.48 + sway * 0.35;
+    const ctrlY = y - h * 0.5;
+    const baseW = 7.5 * scale;
+    const topW = 4.2 * scale;
+
+    // 1. Slender trunk with soft gouache cylinder shading
+    const trunkGrad = ctx.createLinearGradient(x - baseW, 0, x + baseW, 0);
+    trunkGrad.addColorStop(0, "#4a4237");
+    trunkGrad.addColorStop(0.4, "#695e51");
+    trunkGrad.addColorStop(0.8, "#7a6f60");
+    trunkGrad.addColorStop(1, "#443c32");
+    ctx.fillStyle = trunkGrad;
+
+    ctx.beginPath();
+    ctx.moveTo(x - baseW, y);
+    ctx.quadraticCurveTo(ctrlX - (baseW + topW) * 0.5, ctrlY, topX - topW, topY);
+    ctx.lineTo(topX + topW, topY);
+    ctx.quadraticCurveTo(ctrlX + (baseW + topW) * 0.5, ctrlY, x + baseW, y);
+    ctx.closePath();
+    ctx.fill();
+
+    // 2. Distinct chalk-white ring bands
+    const rings = 26;
+    for (let r = 2; r < rings; r++) {
+      const u = r / rings;
+      const rx = (1 - u) * (1 - u) * x + 2 * (1 - u) * u * ctrlX + u * u * topX;
+      const ry = (1 - u) * (1 - u) * y + 2 * (1 - u) * u * ctrlY + u * u * topY;
+      const rw = lerp(baseW, topW, u);
+
+      ctx.strokeStyle = "rgba(235, 230, 218, 0.65)";
+      ctx.lineWidth = 1.3 * scale;
+      ctx.beginPath();
+      ctx.moveTo(rx - rw, ry);
+      ctx.quadraticCurveTo(rx, ry + 1.8 * scale, rx + rw, ry);
+      ctx.stroke();
+
+      ctx.strokeStyle = "rgba(35, 29, 22, 0.45)";
+      ctx.lineWidth = 1.0 * scale;
+      ctx.beginPath();
+      ctx.moveTo(rx - rw, ry - 1.2 * scale);
+      ctx.quadraticCurveTo(rx, ry + 0.6 * scale, rx + rw, ry - 1.2 * scale);
+      ctx.stroke();
+    }
+
+    // 3. Smooth bright jade-green crownshaft cylinder
+    const csH = 24 * scale;
+    const csGrad = ctx.createLinearGradient(topX - topW, 0, topX + topW, 0);
+    csGrad.addColorStop(0, "#2d541b");
+    csGrad.addColorStop(0.5, "#4e7d2b");
+    csGrad.addColorStop(1, "#366120");
+    ctx.fillStyle = csGrad;
+    ctx.beginPath();
+    ctx.roundRect(topX - topW * 1.05, topY - csH, topW * 2.1, csH, 2.5);
+    ctx.fill();
+
+    // 4. Clusters of Golden-Orange Betel Nuts (Supari chhora)
+    ctx.fillStyle = "#e07d24";
+    const nutOffsets = [-4, -1.5, 1.5, 4, -2.5, 2.5];
+    nutOffsets.forEach((nx, i) => {
+      ctx.beginPath();
+      ctx.arc(topX + nx * scale, topY + (3 + (i % 2) * 3) * scale, 2.6 * scale, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // 5. Graceful arching pinnate fronds like a fountain
+    const numFronds = 9;
+    const frondLen = 68 * scale;
+    const frondOriginY = topY - csH * 0.9;
+
+    for (let f = 0; f < numFronds; f++) {
+      const fAng = -Math.PI * 0.95 + (f / (numFronds - 1)) * Math.PI * 0.9 + sway * 0.05;
+      const endX = topX + Math.cos(fAng) * frondLen;
+      const endY = frondOriginY + Math.sin(fAng) * frondLen * 0.65 + 26 * scale;
+      const cpx = (topX + endX) * 0.5;
+      const cpy = (frondOriginY + endY) * 0.5 - 22 * scale;
+
+      // Rachis
+      ctx.strokeStyle = f % 2 === 0 ? "#437326" : "#2f571b";
+      ctx.lineWidth = 1.9 * scale;
+      ctx.beginPath();
+      ctx.moveTo(topX, frondOriginY);
+      ctx.quadraticCurveTo(cpx, cpy, endX, endY);
+      ctx.stroke();
+
+      // Drooping leaflets
+      const leaflets = 14;
+      ctx.strokeStyle = f % 2 === 0 ? "#52852d" : "#3c6920";
+      ctx.lineWidth = 1.2 * scale;
+      ctx.beginPath();
+      for (let l = 2; l <= leaflets; l++) {
+        const u = l / (leaflets + 1);
+        const lx = (1 - u) * (1 - u) * topX + 2 * (1 - u) * u * cpx + u * u * endX;
+        const ly = (1 - u) * (1 - u) * frondOriginY + 2 * (1 - u) * u * cpy + u * u * endY;
+        const lLen = Math.sin(u * Math.PI) * 16 * scale;
+        ctx.moveTo(lx, ly);
+        ctx.lineTo(lx + (endX > topX ? 2 : -2), ly + lLen);
+      }
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  function drawGroundShadeTree(ctx, x, y, trunkW, trunkH, canopySprite, type, scale = 1, sway = 0) {
+    ctx.save();
+    // 1. Buttressed base rooted in the embankment
+    const rootSpread = trunkW * 1.6;
+    ctx.fillStyle = "#2c1d13";
+    ctx.beginPath();
+    ctx.moveTo(x - rootSpread, y + 6);
+    ctx.quadraticCurveTo(x - trunkW * 0.8, y - trunkH * 0.2, x - trunkW * 0.6, y - trunkH * 0.5);
+    ctx.lineTo(x + trunkW * 0.6, y - trunkH * 0.5);
+    ctx.quadraticCurveTo(x + trunkW * 0.8, y - trunkH * 0.2, x + rootSpread, y + 6);
+    ctx.closePath();
+    ctx.fill();
+
+    // 2. Trunk with bark gradient and vertical bark grooves
+    const barkGrad = ctx.createLinearGradient(x - trunkW, 0, x + trunkW, 0);
+    barkGrad.addColorStop(0, "#2d1b10");
+    barkGrad.addColorStop(0.35, "#4a321e");
+    barkGrad.addColorStop(0.75, "#5c3e26");
+    barkGrad.addColorStop(1, "#26170d");
+    ctx.fillStyle = barkGrad;
+
+    ctx.beginPath();
+    ctx.moveTo(x - trunkW * 1.1, y);
+    ctx.quadraticCurveTo(x - trunkW * 0.7, y - trunkH * 0.5, x - trunkW * 0.55 + sway * 0.2, y - trunkH);
+    ctx.lineTo(x + trunkW * 0.55 + sway * 0.2, y - trunkH);
+    ctx.quadraticCurveTo(x + trunkW * 0.7, y - trunkH * 0.5, x + trunkW * 1.1, y);
+    ctx.closePath();
+    ctx.fill();
+
+    // Bark grooves
+    ctx.strokeStyle = "rgba(22, 13, 7, 0.65)";
+    ctx.lineWidth = 1.8;
+    for (let g = -1; g <= 1; g++) {
+      ctx.beginPath();
+      ctx.moveTo(x + g * trunkW * 0.4, y + 2);
+      ctx.quadraticCurveTo(x + g * trunkW * 0.35 + (g * 3), y - trunkH * 0.5, x + g * trunkW * 0.3 + sway * 0.2, y - trunkH);
+      ctx.stroke();
+    }
+
+    // 3. Heavy spreading boughs
+    ctx.strokeStyle = "#382415";
+    ctx.lineWidth = trunkW * 0.58;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(x + sway * 0.15, y - trunkH * 0.85);
+    ctx.quadraticCurveTo(x - 38 + sway * 0.35, y - trunkH - 18, x - 72 + sway * 0.5, y - trunkH - 32);
+    ctx.moveTo(x + sway * 0.15, y - trunkH * 0.9);
+    ctx.quadraticCurveTo(x + 36 + sway * 0.35, y - trunkH - 16, x + 68 + sway * 0.5, y - trunkH - 30);
+    ctx.moveTo(x + sway * 0.2, y - trunkH * 0.92);
+    ctx.lineTo(x + sway * 0.35, y - trunkH - 38);
+    ctx.stroke();
+
+    // 4. Banyan aerial roots (Jhuri)
+    if (type === "banyan") {
+      ctx.strokeStyle = "#462e1a";
+      ctx.lineWidth = 2.2;
+      [-42, -24, 26, 45].forEach((rx, idx) => {
+        ctx.beginPath();
+        ctx.moveTo(x + rx + sway * 0.3, y - trunkH - 10);
+        ctx.quadraticCurveTo(x + rx + sway * 0.45, y - trunkH * 0.45, x + rx * 0.85 + sway * 0.3, y + 2 - (idx % 2) * 6);
+        ctx.stroke();
+      });
+    }
+
+    // 5. Jackfruit on trunk
+    if (type === "jackfruit") {
+      [[-trunkW * 0.75, -trunkH * 0.62], [trunkW * 0.7, -trunkH * 0.45]].forEach(([jx, jy]) => {
+        ctx.fillStyle = "#657d28";
+        ctx.beginPath();
+        ctx.ellipse(x + jx + sway * 0.15, y + jy, 7, 12, 0.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#4a5d1b";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+    }
+
+    // 6. Volumetric painterly canopy overlay
+    const topX = x + sway * 0.45;
+    const topY = y - trunkH - 45;
+    const cw = canopySprite.width * scale;
+    const ch = canopySprite.height * scale;
+
+    ctx.save();
+    ctx.translate(topX, topY);
+    ctx.drawImage(canopySprite, -cw * 0.52, -ch * 0.55, cw, ch);
+    ctx.drawImage(canopySprite, -cw * 0.35 + sway * 0.15, -ch * 0.65, cw * 0.82, ch * 0.82);
+
+    // If Krishnachura, overlay vivid vermilion-orange blossoms!
+    if (type === "krishnachura") {
+      ctx.fillStyle = "#f54722";
+      const blossoms = [
+        [-cw * 0.3, -ch * 0.35], [-cw * 0.15, -ch * 0.5], [cw * 0.1, -ch * 0.48],
+        [cw * 0.28, -ch * 0.32], [-cw * 0.05, -ch * 0.3], [-cw * 0.22, -ch * 0.18],
+        [cw * 0.2, -ch * 0.15], [0, -ch * 0.58], [cw * 0.32, -ch * 0.45]
+      ];
+      blossoms.forEach(([bx, by]) => {
+        ctx.beginPath();
+        ctx.arc(bx, by, 5.5 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#ffaa33";
+        ctx.beginPath();
+        ctx.arc(bx + 1.5, by - 1.5, 2.5 * scale, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#f54722";
+      });
+    }
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  function drawGroundBambooClump(ctx, x, y, numCanes = 11, spread = 36, h = 195, lean = 0, sway = 0) {
+    ctx.save();
+    for (let i = 0; i < numCanes; i++) {
+      const u = i / (numCanes - 1) - 0.5;
+      const caneBaseX = x + u * spread;
+      const caneH = h * (0.85 + Math.sin(i * 1.7) * 0.18);
+      const caneLean = lean + u * 45 + sway;
+      const topX = caneBaseX + caneLean;
+      const topY = y - caneH;
+      const ctrlX = caneBaseX + caneLean * 0.4;
+      const ctrlY = y - caneH * 0.55;
+
+      // Cane stalk
+      ctx.strokeStyle = i % 2 === 0 ? "#738a35" : "#8ea842";
+      ctx.lineWidth = 3.2 - Math.abs(u) * 1.2;
+      ctx.beginPath();
+      ctx.moveTo(caneBaseX, y);
+      ctx.quadraticCurveTo(ctrlX, ctrlY, topX, topY);
+      ctx.stroke();
+
+      // Nodes
+      const nodes = 7;
+      ctx.strokeStyle = "#46571e";
+      ctx.lineWidth = 1.4;
+      for (let n = 1; n < nodes; n++) {
+        const nu = n / nodes;
+        const nx = (1 - nu) * (1 - nu) * caneBaseX + 2 * (1 - nu) * nu * ctrlX + nu * nu * topX;
+        const ny = (1 - nu) * (1 - nu) * y + 2 * (1 - nu) * nu * ctrlY + nu * nu * topY;
+        ctx.beginPath();
+        ctx.moveTo(nx - 2.5, ny);
+        ctx.lineTo(nx + 2.5, ny);
+        ctx.stroke();
+
+        if (n >= 3) {
+          const lDir = (i + n) % 2 === 0 ? 1 : -1;
+          ctx.fillStyle = (i + n) % 3 === 0 ? "#5a8c2d" : "#72a838";
+          ctx.beginPath();
+          ctx.moveTo(nx, ny);
+          ctx.quadraticCurveTo(nx + lDir * 14 + sway * 0.3, ny - 6, nx + lDir * 24 + sway * 0.5, ny + 2);
+          ctx.quadraticCurveTo(nx + lDir * 12 + sway * 0.2, ny + 4, nx, ny);
+          ctx.fill();
+        }
+      }
+    }
+    ctx.restore();
+  }
+
   // ============================================================================
   // 5. PRE-RENDERED SCENE 4 GROUND-LEVEL STATIC LAYER (2D EMBANKMENT EDITION)
   // ============================================================================
@@ -2319,12 +2587,70 @@
       ctx.stroke();
     }
 
-    // Lush gouache Banyan, Mango & Jackfruit canopies behind the embankment
-    ctx.drawImage(banyanCanopyA, 420, 340, 230, 155);
-    ctx.drawImage(mangoCanopySprite, 620, 360, 195, 140);
-    ctx.drawImage(jackfruitCanopySprite, 810, 355, 205, 145);
-    ctx.drawImage(banyanCanopyB, 1140, 348, 225, 150);
-    ctx.drawImage(mangoCanopySprite, 1340, 365, 190, 135);
+    // ============================================================================
+    // LUSH AUTHENTIC TREES BESIDE THE RAILWAY LINE (GRAM BANGLA EMBANKMENT TREELINE)
+    // ============================================================================
+    // Layer 1: Continuous Forest of Broad Woody Shade Trees (Banyan, Mango, Jackfruit, Krishnachura)
+    const groundShadeTrees = [
+      { x: 75,   y: 495, trunkW: 19, trunkH: 112, sprite: mangoCanopySprite,     type: "mango",        scale: 0.96 },
+      { x: 275,  y: 494, trunkW: 24, trunkH: 125, sprite: banyanCanopyA,         type: "banyan",       scale: 1.05 },
+      { x: 495,  y: 492, trunkW: 20, trunkH: 116, sprite: krishnachuraCanopySprite, type: "krishnachura", scale: 1.02 },
+      { x: 675,  y: 495, trunkW: 18, trunkH: 108, sprite: mangoCanopySprite,     type: "mango",        scale: 0.95 },
+      { x: 825,  y: 493, trunkW: 22, trunkH: 118, sprite: jackfruitCanopySprite, type: "jackfruit",    scale: 1.02 },
+      { x: 1045, y: 494, trunkW: 25, trunkH: 126, sprite: banyanCanopyB,         type: "banyan",       scale: 1.08 },
+      { x: 1235, y: 493, trunkW: 19, trunkH: 112, sprite: mangoCanopySprite,     type: "mango",        scale: 0.96 },
+      { x: 1395, y: 492, trunkW: 21, trunkH: 118, sprite: krishnachuraCanopySprite, type: "krishnachura", scale: 1.02 },
+      { x: 1565, y: 495, trunkW: 23, trunkH: 122, sprite: banyanCanopyA,         type: "banyan",       scale: 1.05 }
+    ];
+    groundShadeTrees.forEach(st => {
+      drawGroundShadeTree(ctx, st.x, st.y, st.trunkW, st.trunkH, st.sprite, st.type, st.scale);
+    });
+
+    // Layer 2: Arching Bamboo Groves (Bansh Jhaar) along the embankment shoulder
+    const groundBamboo = [
+      { x: 385,  y: 504, canes: 11, spread: 34, h: 195, lean: -15 },
+      { x: 735,  y: 506, canes: 9,  spread: 28, h: 180, lean: 12 },
+      { x: 965,  y: 505, canes: 12, spread: 36, h: 205, lean: 16 },
+      { x: 1455, y: 508, canes: 10, spread: 32, h: 190, lean: -12 }
+    ];
+    groundBamboo.forEach(gb => {
+      drawGroundBambooClump(ctx, gb.x, gb.y, gb.canes, gb.spread, gb.h, gb.lean);
+    });
+
+    // Layer 3: Graceful Clustered Betel Nut Palms (Supari Gach) with white rings & orange berries
+    const groundBetel = [
+      { x: 195,  y: 502, h: 265, lean: -6, scale: 0.98 },
+      { x: 215,  y: 504, h: 245, lean: 5,  scale: 0.94 },
+      { x: 615,  y: 504, h: 275, lean: -4, scale: 1.02 },
+      { x: 632,  y: 506, h: 255, lean: 6,  scale: 0.96 },
+      { x: 1185, y: 504, h: 270, lean: -5, scale: 1.00 },
+      { x: 1202, y: 506, h: 248, lean: 7,  scale: 0.95 },
+      { x: 1345, y: 506, h: 260, lean: 4,  scale: 0.98 },
+      { x: 1362, y: 508, h: 242, lean: -6, scale: 0.93 }
+    ];
+    groundBetel.forEach(gb => {
+      drawGroundBetelPalm(ctx, gb.x, gb.y, gb.h, gb.lean, gb.scale);
+    });
+
+    // Layer 4: Kashful plumes & wild dhoob grass tufts along the railway embankment verge
+    for (let k = 0; k < 45; k++) {
+      const kx = (k * 37 + 12) % CW;
+      const ky = 506 + (k % 4) * 2.5;
+      const kh = 34 + (k % 5) * 12;
+      const klean = (k % 2 === 0 ? 1 : -1) * (4 + (k % 3) * 3);
+      // Kashful stem
+      ctx.strokeStyle = "#5a7a32";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(kx, ky);
+      ctx.quadraticCurveTo(kx + klean * 0.4, ky - kh * 0.5, kx + klean, ky - kh);
+      ctx.stroke();
+      // Silvery white feathery Kashful plume
+      ctx.fillStyle = "rgba(245, 248, 250, 0.82)";
+      ctx.beginPath();
+      ctx.ellipse(kx + klean, ky - kh + 4, 3.8, 12, klean * 0.05, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     // 2. Earthen Railway Embankment Slope & Foreground Village Soil
     const groundGrad = ctx.createLinearGradient(0, 545, 0, CH);
@@ -2358,6 +2684,7 @@
   }));
 
   const AERIAL_PALMS = [
+    // Village homestead palms
     { x: 915,  y: 470, h: 215, lean: -24, type: "coconut", phase: 0.4, fronds: 11 },
     { x: 1085, y: 430, h: 235, lean: -16, type: "coconut", phase: 1.2, fronds: 12 },
     { x: 1185, y: 445, h: 220, lean: 22,  type: "coconut", phase: 2.1, fronds: 11 },
@@ -2366,7 +2693,18 @@
     { x: 285,  y: 560, h: 205, lean: -22, type: "coconut", phase: 5.2, fronds: 11 },
     { x: 965,  y: 495, h: 185, lean: -6,  type: "betel",   phase: 0.9, fronds: 9 },
     { x: 985,  y: 498, h: 195, lean: 4,   type: "betel",   phase: 1.7, fronds: 9 },
-    { x: 595,  y: 565, h: 185, lean: -8,  type: "betel",   phase: 2.6, fronds: 9 }
+    { x: 595,  y: 565, h: 185, lean: -8,  type: "betel",   phase: 2.6, fronds: 9 },
+
+    // Railway line embankment palms — East / River side corridor
+    { x: 1180, y: 1080, h: 235, lean: 16, type: "coconut", phase: 1.1, fronds: 12 },
+    { x: 1300, y: 800,  h: 210, lean: 20, type: "betel",   phase: 2.7, fronds: 9 },
+    { x: 1495, y: 545,  h: 185, lean: 18, type: "coconut", phase: 4.3, fronds: 11 },
+    { x: 1780, y: 330,  h: 155, lean: 14, type: "betel",   phase: 0.7, fronds: 9 },
+
+    // Railway line embankment palms — West / Village & Paddy side corridor
+    { x: 1010, y: 1030, h: 225, lean: -13, type: "betel",   phase: 1.4, fronds: 9 },
+    { x: 1190, y: 730,  h: 205, lean: -16, type: "coconut", phase: 3.0, fronds: 11 },
+    { x: 1445, y: 480,  h: 175, lean: -10, type: "betel",   phase: 4.6, fronds: 9 }
   ];
 
   const AERIAL_BANANAS = [
@@ -3156,13 +3494,21 @@
     ctx.save();
 
     const bgTrees = [
-      { x: 580,  y: 440, trunkW: 16, trunkH: 92, sprite: banyanCanopyA,       phase: 0.2, type: "banyan" },
-      { x: 735,  y: 445, trunkW: 13, trunkH: 78, sprite: mangoCanopySprite,   phase: 1.1, type: "mango" },
-      { x: 895,  y: 425, trunkW: 14, trunkH: 82, sprite: jackfruitCanopySprite, phase: 1.9, type: "jackfruit" },
-      { x: 1055, y: 395, trunkW: 15, trunkH: 85, sprite: banyanCanopyB,       phase: 2.6, type: "banyan" },
-      { x: 1235, y: 375, trunkW: 13, trunkH: 76, sprite: mangoCanopySprite,   phase: 3.3, type: "mango" },
-      { x: 1395, y: 360, trunkW: 12, trunkH: 72, sprite: jackfruitCanopySprite, phase: 4.1, type: "jackfruit" },
-      { x: 245,  y: 535, trunkW: 15, trunkH: 88, sprite: banyanCanopyA,       phase: 0.8, type: "banyan" }
+      // Village homestead shade trees
+      { x: 580,  y: 440, trunkW: 16, trunkH: 92, sprite: banyanCanopyA,          phase: 0.2, type: "banyan" },
+      { x: 735,  y: 445, trunkW: 13, trunkH: 78, sprite: mangoCanopySprite,      phase: 1.1, type: "mango" },
+      { x: 895,  y: 425, trunkW: 14, trunkH: 82, sprite: jackfruitCanopySprite,  phase: 1.9, type: "jackfruit" },
+      { x: 1055, y: 395, trunkW: 15, trunkH: 85, sprite: banyanCanopyB,          phase: 2.6, type: "banyan" },
+      { x: 1235, y: 375, trunkW: 13, trunkH: 76, sprite: mangoCanopySprite,      phase: 3.3, type: "mango" },
+      { x: 1395, y: 360, trunkW: 12, trunkH: 72, sprite: jackfruitCanopySprite,  phase: 4.1, type: "jackfruit" },
+      { x: 245,  y: 535, trunkW: 15, trunkH: 88, sprite: banyanCanopyA,          phase: 0.8, type: "banyan" },
+
+      // Railway line embankment shade trees
+      { x: 1165, y: 1010, trunkW: 15, trunkH: 84, sprite: mangoCanopySprite,         phase: 0.5, type: "mango" },
+      { x: 1250, y: 860,  trunkW: 16, trunkH: 88, sprite: krishnachuraCanopySprite, phase: 1.4, type: "krishnachura" },
+      { x: 1345, y: 720,  trunkW: 14, trunkH: 80, sprite: jackfruitCanopySprite,    phase: 2.3, type: "jackfruit" },
+      { x: 1455, y: 590,  trunkW: 13, trunkH: 74, sprite: mangoCanopySprite,         phase: 3.2, type: "mango" },
+      { x: 1580, y: 465,  trunkW: 12, trunkH: 68, sprite: banyanCanopyB,             phase: 4.1, type: "banyan" }
     ];
 
     for (const bt of bgTrees) {
@@ -3187,6 +3533,15 @@
           ctx.fillStyle = "#6d822b";
           ctx.beginPath();
           ctx.ellipse(jx, jy, 6.5, 11, 0.15, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      if (bt.type === "krishnachura") {
+        ctx.fillStyle = "#f54722";
+        [[-22, -bt.trunkH - 42], [18, -bt.trunkH - 50], [-8, -bt.trunkH - 58], [28, -bt.trunkH - 35], [-32, -bt.trunkH - 28]].forEach(([fx, fy]) => {
+          ctx.beginPath();
+          ctx.arc(bt.x + fx + sway * 0.7, bt.y + fy, 4.5, 0, Math.PI * 2);
           ctx.fill();
         });
       }
@@ -4804,6 +5159,53 @@
     drawDetailedBananaFrond(390, -15, 460, 0.78, false);
     drawDetailedBananaFrond(740, -25, 480, 0.85, false);
     drawDetailedBananaFrond(960, -35, 460, 0.62, false);
+
+    // Roadside Betel Palms & Arched Bamboo Grove on Right Foreground/Midground (framing the railway line)
+    const rightRoadsideSway = baseSway * 1.35;
+    drawGroundBetelPalm(ctx, 1530, 545, 275, -12, 1.05, rightRoadsideSway * 22);
+    drawGroundBambooClump(ctx, 1445, 552, 10, 30, 185, -18, rightRoadsideSway * 32);
+
+    // Dipping Krishnachura blossom bough framing the upper right corner
+    ctx.save();
+    ctx.translate(1620, -10);
+    ctx.rotate(0.32 + rightRoadsideSway * 0.4);
+    ctx.strokeStyle = "#382314";
+    ctx.lineWidth = 14;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(-140, 45, -280, 75);
+    ctx.stroke();
+
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(-110, 36);
+    ctx.quadraticCurveTo(-160, 85, -220, 115);
+    ctx.moveTo(-180, 56);
+    ctx.quadraticCurveTo(-230, 105, -270, 130);
+    ctx.stroke();
+
+    for (let k = 0; k < 18; k++) {
+      const ku = k / 18;
+      const kbx = lerp(0, -280, ku);
+      const kby = lerp(0, 75, ku) + Math.sin(ku * Math.PI) * 22;
+      const flutter = Math.sin(t * 12 + k) * (2 + gust * 12);
+      ctx.fillStyle = k % 2 === 0 ? "#497d26" : "#639932";
+      ctx.beginPath();
+      ctx.ellipse(kbx + flutter * 0.4, kby + 12 + flutter * 0.2, 14, 6.5, -0.45, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (k % 3 === 0) {
+        ctx.fillStyle = "#f54722";
+        ctx.beginPath();
+        ctx.arc(kbx + flutter * 0.3, kby + 20, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#ffaa33";
+        ctx.beginPath();
+        ctx.arc(kbx + flutter * 0.3 + 1.5, kby + 18.5, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
 
     // Foreground Grass & Heart-shaped Taro Leaves (Kochu Pata)
     for (let g = 0; g < 65; g++) {
