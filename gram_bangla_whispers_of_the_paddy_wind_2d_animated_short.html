@@ -3209,24 +3209,6 @@
   function drawPaddyWindAndKashful(ctx, t, atm) {
     const { wind } = atm;
     ctx.save();
-    for (let wBand = 0; wBand < 6; wBand++) {
-      const bandX = ((wBand * 185 + t * (54 + wind * 90)) % 920) - 60;
-      const bandGrad = ctx.createLinearGradient(bandX, 240, bandX + 110, 560);
-      bandGrad.addColorStop(0, "rgba(224, 210, 112, 0)");
-      bandGrad.addColorStop(0.5, "rgba(232, 218, 120, 0.18)");
-      bandGrad.addColorStop(1, "rgba(224, 210, 112, 0)");
-      ctx.fillStyle = bandGrad;
-      ctx.fillRect(bandX, 225, 110, 380);
-    }
-    for (let wBand = 0; wBand < 5; wBand++) {
-      const bandX = 1650 + ((wBand * 165 + t * (58 + wind * 85)) % 740);
-      const bandGrad = ctx.createLinearGradient(bandX, 240, bandX + 105, 520);
-      bandGrad.addColorStop(0, "rgba(224, 210, 112, 0)");
-      bandGrad.addColorStop(0.5, "rgba(232, 218, 120, 0.18)");
-      bandGrad.addColorStop(1, "rgba(224, 210, 112, 0)");
-      ctx.fillStyle = bandGrad;
-      ctx.fillRect(bandX, 220, 105, 320);
-    }
 
     for (let i = 0; i < 28; i++) {
       const kx = lerp(1465, 1840, i / 28) + Math.sin(i * 2.1) * 14;
@@ -4708,18 +4690,6 @@
 
   function drawAerialBirds(ctx, t) {
     ctx.save();
-    for (let b = 0; b < 6; b++) {
-      const bx = (1350 + b * 145 + t * (42 + b * 5)) % WW;
-      const by = 420 + b * 75 + Math.sin(t * 2.2 + b) * 18;
-      const wing = Math.sin(t * 9.5 + b * 1.4) * 9;
-      ctx.strokeStyle = "#f8f9fa";
-      ctx.lineWidth = 2.4;
-      ctx.beginPath();
-      ctx.moveTo(bx - 10, by - wing);
-      ctx.quadraticCurveTo(bx - 3, by, bx, by);
-      ctx.quadraticCurveTo(bx + 3, by, bx + 10, by - wing);
-      ctx.stroke();
-    }
 
     const kx = 1760 + Math.sin(t * 1.4) * 165;
     const ky = 720 + Math.cos(t * 1.9) * 85;
@@ -5256,42 +5226,8 @@
   // 10. POST-PROCESSING: MIST, GOD RAYS, COLOR GRADING, GRAIN & TITLE CARDS
   // ============================================================================
   function renderPostProcessingAndTitles(ctx, t, cam, atm) {
-    const { pal, mist, sunsetAmt } = atm;
+    const { pal, sunsetAmt } = atm;
     ctx.save();
-
-    if (mist > 0.01 && cam.mode === "aerial") {
-      ctx.save();
-      for (let m = 0; m < 4; m++) {
-        const my = 180 + m * 145;
-        const mGrad = ctx.createLinearGradient(0, my - 45, 0, my + 45);
-        mGrad.addColorStop(0, "rgba(252, 236, 214, 0)");
-        mGrad.addColorStop(0.5, `rgba(252, 236, 214, ${mist * (0.22 - m * 0.03)})`);
-        mGrad.addColorStop(1, "rgba(252, 236, 214, 0)");
-        ctx.fillStyle = mGrad;
-        ctx.fillRect(0, my - 45, CW, 90);
-      }
-      ctx.restore();
-    }
-
-    ctx.save();
-    ctx.globalCompositeOperation = "screen";
-    const rayAlpha = cam.mode === "ground" ? 0.09 : (0.12 + sunsetAmt * 0.14);
-    for (let r = 0; r < 6; r++) {
-      const rx = 220 + r * 250 + Math.sin(t * 0.25 + r) * 35;
-      const grad = ctx.createLinearGradient(rx, 0, rx + 260, CH);
-      grad.addColorStop(0, `rgba(255, 230, 168, ${rayAlpha})`);
-      grad.addColorStop(0.65, `rgba(255, 205, 130, ${rayAlpha * 0.38})`);
-      grad.addColorStop(1, "rgba(255, 190, 110, 0)");
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.moveTo(rx - 85, 0);
-      ctx.lineTo(rx + 85, 0);
-      ctx.lineTo(rx + 410, CH);
-      ctx.lineTo(rx + 105, CH);
-      ctx.closePath();
-      ctx.fill();
-    }
-    ctx.restore();
 
     if (sunsetAmt > 0.01) {
       ctx.save();
