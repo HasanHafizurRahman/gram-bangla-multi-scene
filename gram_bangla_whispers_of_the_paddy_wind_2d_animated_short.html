@@ -6899,11 +6899,6 @@
           ctx.fillRect(0, 0, CW, CH);
         }
 
-        if (t >= 1.2 && t <= 11.2) {
-          const alpha = smoothstep(1.2, 3.2, t) * (1 - smoothstep(8.8, 11.2, t));
-          drawCinemaTitleCard(ctx, "পথের পাঁচালী — কাশবন ও কলের গাড়ির গান", "Pather Panchali Meets Studio Ghibli — Whispers of Nischindipur", alpha);
-        }
-
         if (t >= 88.5) {
           const alpha = smoothstep(88.5, 91.5, t);
           drawCinemaTitleCard(ctx, "সমাপ্ত", "A Tribute to Satyajit Ray & Studio Ghibli", alpha);
