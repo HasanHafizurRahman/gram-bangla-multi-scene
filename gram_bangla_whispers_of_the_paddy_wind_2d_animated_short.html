@@ -631,40 +631,40 @@
 
       const PALETTES = {
         morning: {
-          skyTop: hexToRgb("#3e5b78"),
-          skyMid: hexToRgb("#c69b7b"),
-          skyHor: hexToRgb("#f6d79e"),
-          waterTop: hexToRgb("#b58c6e"),
-          waterBot: hexToRgb("#2d4a43"),
-          ambient: [254, 224, 178],
-          shadowAlpha: 0.12
+          skyTop: hexToRgb("#2468a8"),
+          skyMid: hexToRgb("#78bae0"),
+          skyHor: hexToRgb("#ffe3a8"),
+          waterTop: hexToRgb("#54b0c9"),
+          waterBot: hexToRgb("#1d6356"),
+          ambient: [255, 238, 195],
+          shadowAlpha: 0.0
         },
         day: {
-          skyTop: hexToRgb("#4f95b8"),
-          skyMid: hexToRgb("#95cadb"),
-          skyHor: hexToRgb("#e6f0d5"),
-          waterTop: hexToRgb("#6da8ba"),
-          waterBot: hexToRgb("#2a5c4a"),
-          ambient: [255, 250, 232],
-          shadowAlpha: 0.04
+          skyTop: hexToRgb("#1b6cb5"),
+          skyMid: hexToRgb("#68bee8"),
+          skyHor: hexToRgb("#f2f7d9"),
+          waterTop: hexToRgb("#47b5d4"),
+          waterBot: hexToRgb("#196656"),
+          ambient: [255, 252, 236],
+          shadowAlpha: 0.0
         },
         golden: {
-          skyTop: hexToRgb("#3f3b6c"),
-          skyMid: hexToRgb("#c76b55"),
-          skyHor: hexToRgb("#f8c471"),
-          waterTop: hexToRgb("#b86b52"),
-          waterBot: hexToRgb("#2c3a42"),
-          ambient: [255, 194, 128],
-          shadowAlpha: 0.22
+          skyTop: hexToRgb("#2e3878"),
+          skyMid: hexToRgb("#e06850"),
+          skyHor: hexToRgb("#ffd166"),
+          waterTop: hexToRgb("#e28758"),
+          waterBot: hexToRgb("#224459"),
+          ambient: [255, 206, 138],
+          shadowAlpha: 0.08
         },
         dusk: {
-          skyTop: hexToRgb("#1d2642"),
-          skyMid: hexToRgb("#7c4958"),
-          skyHor: hexToRgb("#e59866"),
-          waterTop: hexToRgb("#754852"),
-          waterBot: hexToRgb("#182432"),
-          ambient: [195, 140, 118],
-          shadowAlpha: 0.34
+          skyTop: hexToRgb("#182452"),
+          skyMid: hexToRgb("#8a4b68"),
+          skyHor: hexToRgb("#f0945a"),
+          waterTop: hexToRgb("#8c5263"),
+          waterBot: hexToRgb("#162840"),
+          ambient: [210, 155, 130],
+          shadowAlpha: 0.18
         }
       };
 
@@ -1856,10 +1856,10 @@
         return c;
       }
 
-      const banyanCanopyA = createPainterlyCanopySprite(270, 195, 501, ["#0f2115", "#183320", "#234a2c", "#346638", "#4f8545", "#76a656"], "banyan");
-      const banyanCanopyB = createPainterlyCanopySprite(250, 185, 502, ["#112417", "#1b3722", "#28502e", "#3c6e3b", "#5c914b", "#84b362"], "banyan");
-      const mangoCanopySprite = createPainterlyCanopySprite(220, 175, 601, ["#132615", "#1e3c1f", "#2d572a", "#447837", "#679643", "#8fb352"], "mango");
-      const jackfruitCanopySprite = createPainterlyCanopySprite(230, 180, 701, ["#0e2012", "#17331c", "#234826", "#336332", "#4c803f", "#6e9e4f"], "banyan");
+      const banyanCanopyA = createPainterlyCanopySprite(270, 195, 501, ["#0d2622", "#153e32", "#1f5c3e", "#328048", "#58a84e", "#92cf58"], "banyan");
+      const banyanCanopyB = createPainterlyCanopySprite(250, 185, 502, ["#0f2924", "#184235", "#246342", "#3a874c", "#64b354", "#9ed962"], "banyan");
+      const mangoCanopySprite = createPainterlyCanopySprite(220, 175, 601, ["#11291e", "#1b452c", "#296638", "#428c42", "#72b84c", "#aee05a"], "mango");
+      const jackfruitCanopySprite = createPainterlyCanopySprite(230, 180, 701, ["#0c241d", "#143b2b", "#1f5738", "#317842", "#529e49", "#84c454"], "banyan");
       const krishnachuraCanopySprite = createPainterlyCanopySprite(255, 185, 801, ["#162614", "#28471e", "#782416", "#b8321a", "#e6481e", "#ff742e"], "mango");
 
       const horizonCanvas = createOffscreen(WW, 360);
@@ -2394,16 +2394,16 @@
 
         // 1. Base Lush Gouache Paddy Landscape (y: 280 to WH)
         const landGrad = ctx.createLinearGradient(0, 280, 0, WH);
-        landGrad.addColorStop(0, "#4e7536");
-        landGrad.addColorStop(0.25, "#68943c");
-        landGrad.addColorStop(0.55, "#8ca842");
-        landGrad.addColorStop(0.82, "#6c8c36");
-        landGrad.addColorStop(1, "#436328");
+        landGrad.addColorStop(0, "#3b7a4a");
+        landGrad.addColorStop(0.25, "#5ca348");
+        landGrad.addColorStop(0.55, "#8ec449");
+        landGrad.addColorStop(0.82, "#68a33e");
+        landGrad.addColorStop(1, "#3d7334");
         ctx.fillStyle = landGrad;
         ctx.fillRect(0, 280, WW, WH - 280);
 
         // 2. Organic Perspective Terraced Paddy Plots with Raised Earthen Bunds ("Aal")
-        const paddyPalettes = ["#84a33a", "#98b044", "#689138", "#b2bd46", "#5e8532", "#759c3a", "#a4b848"];
+        const paddyPalettes = ["#7cb844", "#98cc4c", "#5ea142", "#b5d952", "#4f913d", "#6eb043", "#a6d14f"];
         for (let row = 0; row < 18; row++) {
           const py = 295 + row * 56;
           const rowH = 54 + (rng() - 0.5) * 8;
@@ -3202,10 +3202,10 @@
 
         // 1. Luminous Studio Ghibli Cerulean-to-Warm-Ivory Sky
         const skyGrad = ctx.createLinearGradient(0, 0, 0, 480);
-        skyGrad.addColorStop(0, "#3b82b6");
-        skyGrad.addColorStop(0.48, "#7eb8da");
-        skyGrad.addColorStop(0.82, "#c6e2d9");
-        skyGrad.addColorStop(1, "#f5edd6");
+        skyGrad.addColorStop(0, "#1d6fa5");
+        skyGrad.addColorStop(0.42, "#54a8db");
+        skyGrad.addColorStop(0.78, "#a8dff0");
+        skyGrad.addColorStop(1, "#f7f3df");
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, CW, 480);
 
@@ -3322,11 +3322,11 @@
         // 5. Lush Grassy Embankment Slope & Golden-Ochre Village Meadow Path (y: 575..CH)
         // Replaces the ugly brown-mud-droppings rectangle with a rich, rolling Ghibli meadow!
         const slopeGrad = ctx.createLinearGradient(0, 575, 0, CH);
-        slopeGrad.addColorStop(0, "#5c7d32");
-        slopeGrad.addColorStop(0.22, "#6c9138");
-        slopeGrad.addColorStop(0.52, "#54752b");
-        slopeGrad.addColorStop(0.82, "#425e22");
-        slopeGrad.addColorStop(1, "#2d4216");
+        slopeGrad.addColorStop(0, "#5ca13e");
+        slopeGrad.addColorStop(0.24, "#74b844");
+        slopeGrad.addColorStop(0.54, "#529138");
+        slopeGrad.addColorStop(0.82, "#39732d");
+        slopeGrad.addColorStop(1, "#214d22");
         ctx.fillStyle = slopeGrad;
         ctx.fillRect(0, 575, CW, CH - 575);
 
@@ -3821,14 +3821,16 @@
           cy = lerp(625, 790, p) - drift * 35;
           zoom = lerp(1.26, 1.80, p) + drift * 0.12;
         } else if (t < 80) {
-          // Scene 3: Ground Cut — The Afternoon Express
+          // Scene 3: Ground Cut — The Afternoon Express (Cinematic slow dolly push-in & tracking pan)
           mode = "ground";
+          const sceneP = clamp((t - 45) / 35, 0, 1);
+          const passBell = Math.sin(sceneP * Math.PI);
           const shakeAmt = (t >= 47.5 && t <= 74.0)
-            ? (Math.sin(t * 62) * 1.8 + Math.cos(t * 37) * 1.2) * smoothstep(46.5, 49.5, t) * (1 - smoothstep(72.0, 75.0, t))
+            ? (Math.sin(t * 62) * 1.5 + Math.cos(t * 37) * 1.0) * smoothstep(46.5, 49.5, t) * (1 - smoothstep(72.0, 75.0, t))
             : 0;
-          cx = CW * 0.5 + Math.sin(t * 0.9) * 3 + shakeAmt;
-          cy = CH * 0.5 + Math.cos(t * 1.1) * 2 + Math.abs(shakeAmt) * 0.6;
-          zoom = 1.015 + (t >= 47.5 && t <= 74.0 ? 0.018 : 0);
+          cx = lerp(CW * 0.485, CW * 0.52, easeInOutCubic(sceneP)) + Math.sin(t * 0.9) * 2.5 + shakeAmt;
+          cy = lerp(CH * 0.505, CH * 0.49, passBell) + Math.cos(t * 1.1) * 1.8 + Math.abs(shakeAmt) * 0.5;
+          zoom = 1.02 + passBell * 0.038;
         } else {
           // Scene 4: Golden Hour Sunset & Calm Return (pulls back to reveal sunset sky, horizon mosque & fireflies)
           const p = easeInOutCubic((t - 80) / 20);
@@ -3894,27 +3896,40 @@
         ctx.arc(sunX, sunY, 26, 0, Math.PI * 2);
         ctx.fill();
 
-        // Multi-layered Painterly Cumulus Clouds
+        // Sculptural Studio Ghibli Cumulus Clouds (Sunlit Ivory Tops + Cool Periwinkle-Lavender Undersides)
         ctx.save();
         for (const c of CLOUDS) {
-          const cx = ((c.x + t * c.speed) % (WW + 420)) - 210;
-          const cy = c.y + Math.sin(t * 0.25 + c.seed) * 4;
-          const topCol = lerpColor(pal.skyHor, [255, 252, 244], 0.72);
-          const botCol = lerpColor(pal.skyMid, [82, 98, 118], 0.32);
-          const cGrad = ctx.createLinearGradient(cx, cy - c.h * 0.55, cx, cy + c.h * 0.55);
+          const cx = ((c.x + t * c.speed) % (WW + 460)) - 230;
+          const cy = c.y + Math.sin(t * 0.25 + c.seed) * 3.5;
+          const puffs = [
+            [-c.w * 0.30, 8, c.h * 0.46],
+            [-c.w * 0.14, -c.h * 0.18, c.h * 0.62],
+            [c.w * 0.04, -c.h * 0.30, c.h * 0.72],
+            [c.w * 0.22, -c.h * 0.12, c.h * 0.56],
+            [c.w * 0.34, 9, c.h * 0.42],
+            [-c.w * 0.05, 10, c.h * 0.52],
+            [c.w * 0.15, 11, c.h * 0.50]
+          ];
+          // Soft periwinkle-lavender shadow base
+          const shCol = atm.sunsetAmt > 0.25
+            ? lerpColor(pal.skyMid, [118, 78, 122], 0.45)
+            : lerpColor(pal.skyMid, [138, 165, 198], 0.42);
+          const topCol = atm.sunsetAmt > 0.25
+            ? lerpColor(pal.skyHor, [255, 236, 195], 0.78)
+            : "rgb(255, 253, 246)";
+          const cGrad = ctx.createLinearGradient(cx, cy - c.h * 0.85, cx, cy + c.h * 0.55);
           cGrad.addColorStop(0, topCol);
-          cGrad.addColorStop(1, botCol);
+          cGrad.addColorStop(0.62, lerpColor(pal.skyHor, [255, 250, 240], 0.65));
+          cGrad.addColorStop(1, shCol);
           ctx.fillStyle = cGrad;
-          ctx.globalAlpha = 0.84;
-          [
-            [cx, cy, c.w * 0.46, c.h * 0.36],
-            [cx - c.w * 0.24, cy + 5, c.w * 0.32, c.h * 0.28],
-            [cx + c.w * 0.25, cy + 4, c.w * 0.34, c.h * 0.30],
-            [cx - c.w * 0.06, cy - c.h * 0.18, c.w * 0.28, c.h * 0.28],
-            [cx + c.w * 0.12, cy - c.h * 0.14, c.w * 0.24, c.h * 0.24]
-          ].forEach(([ex, ey, erx, ery]) => {
+          ctx.globalAlpha = 0.94;
+          // Draw unified cloud silhouette base + sculpted puffs with nonzero winding
+          ctx.beginPath();
+          ctx.ellipse(cx, cy + 6, c.w * 0.42, c.h * 0.36, 0, 0, Math.PI * 2);
+          ctx.fill();
+          puffs.forEach(([ox, oy, r]) => {
             ctx.beginPath();
-            ctx.ellipse(ex, ey, erx, ery, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx + ox, cy + oy, r * 1.15, r * 0.88, 0, 0, Math.PI * 2);
             ctx.fill();
           });
         }
@@ -3955,6 +3970,41 @@
 
         // 9. Graceful White Egrets ("Bok") & Kingfisher
         drawAerialBirds(ctx, t);
+
+        // 10. Studio Ghibli Diagonal Crepuscular God-Rays & Floating Sunlit Pollen Motes
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        for (let r = 0; r < 6; r++) {
+          const rayAng = 0.32 + r * 0.11 + Math.sin(t * 0.2 + r) * 0.02;
+          const rayLen = 1150;
+          const rx1 = sunX + Math.cos(rayAng) * rayLen;
+          const ry1 = sunY + Math.sin(rayAng) * rayLen;
+          const spread = 65 + (r % 3) * 28;
+          const rayGrad = ctx.createLinearGradient(sunX, sunY, rx1, ry1);
+          const rayAlpha = atm.sunsetAmt > 0.2 ? 0.14 : 0.11;
+          rayGrad.addColorStop(0, `rgba(255, 246, 205, ${rayAlpha})`);
+          rayGrad.addColorStop(0.55, `rgba(255, 232, 168, ${rayAlpha * 0.55})`);
+          rayGrad.addColorStop(1, "rgba(255, 220, 140, 0)");
+          ctx.fillStyle = rayGrad;
+          ctx.beginPath();
+          ctx.moveTo(sunX - 18, sunY);
+          ctx.lineTo(sunX + 18, sunY);
+          ctx.lineTo(rx1 + spread, ry1);
+          ctx.lineTo(rx1 - spread, ry1);
+          ctx.closePath();
+          ctx.fill();
+        }
+        // Floating sunlit dandelion / Kashful motes drifting in the warm breeze
+        for (let m = 0; m < 28; m++) {
+          const mx = ((m * 197 + t * (18 + (m % 4) * 5)) % WW);
+          const my = 260 + ((m * 131 + Math.sin(t * 0.9 + m) * 28) % (WH - 300));
+          const twinkle = 0.35 + 0.65 * Math.pow(0.5 + 0.5 * Math.sin(t * 2.8 + m * 1.3), 2);
+          ctx.fillStyle = `rgba(255, 252, 228, ${twinkle * 0.65})`;
+          ctx.beginPath();
+          ctx.arc(mx, my, 2.0 + (m % 2) * 0.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
 
         ctx.restore();
       }
@@ -4024,9 +4074,9 @@
         shadows.forEach((s, idx) => {
           const sx = (s.baseX + t * (20 + idx * 4)) % (WW + 500) - 250;
           const grad = ctx.createRadialGradient(sx, s.y, s.rx * 0.1, sx, s.y, s.rx);
-          grad.addColorStop(0, "rgba(18, 28, 18, 0.16)");
-          grad.addColorStop(0.65, "rgba(18, 28, 18, 0.08)");
-          grad.addColorStop(1, "rgba(18, 28, 18, 0)");
+          grad.addColorStop(0, "rgba(16, 48, 78, 0.16)");
+          grad.addColorStop(0.65, "rgba(16, 48, 78, 0.08)");
+          grad.addColorStop(1, "rgba(16, 48, 78, 0)");
           ctx.fillStyle = grad;
           ctx.beginPath();
           ctx.ellipse(sx, s.y, s.rx, s.ry, -0.12, 0, Math.PI * 2);
@@ -4107,6 +4157,16 @@
           ctx.moveTo(rx - w, ry + waveY);
           ctx.quadraticCurveTo(rx, ry - 2.5 + waveY, rx + w, ry + waveY);
           ctx.stroke();
+          // Sparkling Ghibli diamond sun-glints ("Komorebi" on water)
+          if (i % 3 === 0) {
+            const sparkle = Math.pow(Math.max(0, Math.sin(t * 4.2 + i * 1.9)), 4);
+            if (sparkle > 0.25) {
+              ctx.fillStyle = `rgba(255, 254, 235, ${sparkle * 0.88})`;
+              ctx.beginPath();
+              ctx.arc(rx, ry + waveY - 1, 1.8 + sparkle * 1.6, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
         }
 
         // 3. Floating Water-Hyacinth Clusters ("Kochuripana") with Lilac Blossoms
@@ -5984,6 +6044,20 @@
           const spr = veh.isLoco ? hiResLocoDay : hiResCoachDay;
           ctx.drawImage(spr, veh.x, veh.y + swayY, veh.w, veh.h);
 
+          // Animated specular sunlight glint sweeping across coach windows as they pass through sunbeams
+          if (!veh.isLoco) {
+            const glintPhase = ((veh.x * 0.006 + t * 1.8) % 1 + 1) % 1;
+            if (glintPhase < 0.35) {
+              const gAlpha = Math.sin((glintPhase / 0.35) * Math.PI) * 0.55;
+              ctx.fillStyle = `rgba(255, 253, 230, ${gAlpha})`;
+              for (let wIdx = 0; wIdx < 6; wIdx++) {
+                const wx = veh.x + (48 + wIdx * 37) * (veh.w / 312);
+                const wy = veh.y + swayY + 38 * (veh.h / 160);
+                ctx.fillRect(wx + 2, wy + 2, 7, 19);
+              }
+            }
+          }
+
           // Visible acoustic horn sound rings when the two-tone horn blasts
           if (veh.isLoco && trainSim.hornWave > 0) {
             const hx = veh.x + 236;
@@ -6459,6 +6533,44 @@
           }
         }
 
+        // 3B. Studio Ghibli Diagonal Sunbeams ("Komorebi") Filtering Through the Embankment Trees
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        const sunBeams = [
+          { x0: 180, w0: 55, x1: 420, w1: 135, alpha: 0.13 },
+          { x0: 560, w0: 70, x1: 840, w1: 165, alpha: 0.15 },
+          { x0: 980, w0: 60, x1: 1290, w1: 145, alpha: 0.12 },
+          { x0: 1310, w0: 50, x1: 1590, w1: 125, alpha: 0.11 }
+        ];
+        sunBeams.forEach((sb, idx) => {
+          const shimmer = 0.88 + 0.12 * Math.sin(t * 1.4 + idx * 1.7);
+          const sbGrad = ctx.createLinearGradient(sb.x0, 0, sb.x1, CH);
+          sbGrad.addColorStop(0, "rgba(255, 250, 215, 0)");
+          sbGrad.addColorStop(0.28, `rgba(255, 250, 215, ${sb.alpha * shimmer})`);
+          sbGrad.addColorStop(0.65, `rgba(255, 240, 175, ${sb.alpha * 0.65 * shimmer})`);
+          sbGrad.addColorStop(1, "rgba(255, 230, 150, 0)");
+          ctx.fillStyle = sbGrad;
+          ctx.beginPath();
+          ctx.moveTo(sb.x0 - sb.w0 * 0.5, 0);
+          ctx.lineTo(sb.x0 + sb.w0 * 0.5, 0);
+          ctx.lineTo(sb.x1 + sb.w1 * 0.5, CH);
+          ctx.lineTo(sb.x1 - sb.w1 * 0.5, CH);
+          ctx.closePath();
+          ctx.fill();
+        });
+
+        // Ambient floating white Kashful seeds & golden pollen motes drifting in the warm afternoon sunbeams
+        for (let m = 0; m < 22; m++) {
+          const mx = ((m * 97 + t * (28 + gust * 180 + (m % 5) * 8)) % (CW + 80)) - 40;
+          const my = 280 + ((m * 73 + Math.sin(t * 1.8 + m) * 26) % (CH - 310));
+          const glow = 0.45 + 0.55 * Math.sin(t * 3.2 + m * 1.4);
+          ctx.fillStyle = `rgba(255, 253, 238, ${glow * 0.78})`;
+          ctx.beginPath();
+          ctx.arc(mx, my, 2.2 + (m % 2) * 0.9, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+
         // 4. Wind-Blown Leaves & White Kashful Seeds Swirling in the Train's Slipstream
         if (gust > 0.05) {
           for (let p = 0; p < 24; p++) {
@@ -6494,26 +6606,45 @@
         const { pal, sunsetAmt } = atm;
         ctx.save();
 
+        // Studio Ghibli Luminous Atmospheric Bloom (Screen-blended warm sunlight + vibrant golden hour)
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        const bloomGrad = ctx.createRadialGradient(
+          cam.mode === "ground" ? CW * 0.55 : CW * 0.45,
+          cam.mode === "ground" ? CH * 0.18 : CH * 0.12,
+          20,
+          CW * 0.5,
+          CH * 0.45,
+          CW * 0.75
+        );
         if (sunsetAmt > 0.01) {
-          ctx.save();
-          const sunGrad = ctx.createLinearGradient(0, 0, 0, CH);
-          sunGrad.addColorStop(0, `rgba(199, 107, 85, ${sunsetAmt * 0.30})`);
-          sunGrad.addColorStop(0.5, `rgba(248, 196, 113, ${sunsetAmt * 0.22})`);
-          sunGrad.addColorStop(1, `rgba(44, 58, 66, ${sunsetAmt * 0.28})`);
-          ctx.fillStyle = sunGrad;
-          ctx.fillRect(0, 0, CW, CH);
-          ctx.restore();
+          bloomGrad.addColorStop(0, `rgba(255, 196, 110, ${0.14 + sunsetAmt * 0.18})`);
+          bloomGrad.addColorStop(0.55, `rgba(245, 128, 78, ${sunsetAmt * 0.14})`);
+          bloomGrad.addColorStop(1, "rgba(120, 65, 95, 0)");
+        } else {
+          bloomGrad.addColorStop(0, "rgba(255, 250, 215, 0.11)");
+          bloomGrad.addColorStop(0.5, "rgba(240, 248, 210, 0.05)");
+          bloomGrad.addColorStop(1, "rgba(255, 250, 215, 0)");
         }
+        ctx.fillStyle = bloomGrad;
+        ctx.fillRect(0, 0, CW, CH);
+        ctx.restore();
 
+        // Cool cobalt-indigo twilight shadow glaze only during deep dusk (never dulling daytime scenes!)
         if (pal.shadowAlpha > 0.02) {
-          ctx.fillStyle = `rgba(14, 20, 34, ${pal.shadowAlpha * 0.58})`;
+          const duskGrad = ctx.createLinearGradient(0, 0, 0, CH);
+          duskGrad.addColorStop(0, `rgba(24, 34, 72, ${pal.shadowAlpha * 0.28})`);
+          duskGrad.addColorStop(0.5, `rgba(38, 32, 68, ${pal.shadowAlpha * 0.22})`);
+          duskGrad.addColorStop(1, `rgba(18, 28, 54, ${pal.shadowAlpha * 0.42})`);
+          ctx.fillStyle = duskGrad;
           ctx.fillRect(0, 0, CW, CH);
         }
 
-        const vig = ctx.createRadialGradient(CW * 0.5, CH * 0.5, CW * 0.36, CW * 0.5, CH * 0.5, CW * 0.72);
-        vig.addColorStop(0, "rgba(28, 18, 10, 0)");
-        vig.addColorStop(0.7, "rgba(22, 14, 8, 0.12)");
-        vig.addColorStop(1, "rgba(10, 7, 5, 0.48)");
+        // Feather-light, clean cinema vignette that preserves full color luminosity
+        const vig = ctx.createRadialGradient(CW * 0.5, CH * 0.5, CW * 0.42, CW * 0.5, CH * 0.5, CW * 0.76);
+        vig.addColorStop(0, "rgba(16, 22, 32, 0)");
+        vig.addColorStop(0.78, "rgba(16, 22, 32, 0.05)");
+        vig.addColorStop(1, "rgba(12, 18, 28, 0.22)");
         ctx.fillStyle = vig;
         ctx.fillRect(0, 0, CW, CH);
 
