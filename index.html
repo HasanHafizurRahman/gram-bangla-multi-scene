@@ -170,41 +170,18 @@
       border: 1px solid rgba(244, 235, 217, 0.16);
     }
 
-    /* HUD Top Scene Indicator */
+    /* HUD Top Audio Cue Display */
     #hud-top {
       position: absolute;
       top: 14px;
       left: 16px;
       right: 16px;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
       pointer-events: none;
       z-index: 20;
       transition: opacity 0.5s ease;
-    }
-
-    .hud-pill {
-      background: var(--panel-bg);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(244, 235, 217, 0.16);
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
-    }
-
-    .hud-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #ffd996;
-      box-shadow: 0 0 8px #ffd996;
     }
 
     #active-audio-tags {
@@ -270,39 +247,6 @@
       gap: 5px;
     }
 
-    .scene-markers-row {
-      display: flex;
-      width: 100%;
-      gap: 4px;
-    }
-
-    .scene-jump-btn {
-      flex: 1;
-      background: rgba(244, 235, 217, 0.08);
-      border: 1px solid rgba(244, 235, 217, 0.14);
-      color: rgba(244, 235, 217, 0.78);
-      font-size: 10.5px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      cursor: pointer;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: all 0.2s ease;
-    }
-
-    .scene-jump-btn:hover {
-      background: rgba(226, 169, 82, 0.22);
-      color: #fff8eb;
-    }
-
-    .scene-jump-btn.active {
-      background: rgba(226, 169, 82, 0.28);
-      border-color: rgba(226, 169, 82, 0.65);
-      color: #ffd996;
-      font-weight: 600;
-    }
 
     #timeline-slider {
       -webkit-appearance: none;
@@ -408,11 +352,6 @@
     }
 
     @media (max-width: 640px) {
-      .scene-jump-btn {
-        font-size: 9px;
-        padding: 3px 4px;
-      }
-
       .ctrl-btn span.btn-label {
         display: none;
       }
@@ -432,10 +371,6 @@
 
       <!-- Top HUD -->
       <div id="hud-top">
-        <div class="hud-pill">
-          <span class="hud-dot" id="status-dot"></span>
-          <span id="scene-label">১ · নিশ্চিন্দিপুর ও পুকুরঘাট — Scene 1: Nischindipur Homestead &amp; Pond</span>
-        </div>
         <div id="active-audio-tags"></div>
       </div>
 
@@ -467,12 +402,6 @@
       <!-- Bottom Controls -->
       <div id="controls-bar">
         <div class="timeline-container">
-          <div class="scene-markers-row" id="scene-buttons">
-            <button type="button" class="scene-jump-btn active" data-time="0" style="flex:25">1. Drone (0:00)</button>
-            <button type="button" class="scene-jump-btn" data-time="25" style="flex:20">2. River (0:25)</button>
-            <button type="button" class="scene-jump-btn" data-time="45" style="flex:35">3. Train (0:45)</button>
-            <button type="button" class="scene-jump-btn" data-time="80" style="flex:20">4. Sunset (1:20)</button>
-          </div>
           <input type="range" id="timeline-slider" min="0" max="100" step="0.05" value="0" aria-label="Film Timeline">
         </div>
 
@@ -2377,56 +2306,6 @@
           hctx.lineTo(0, 312);
           hctx.closePath();
           hctx.fill();
-
-          if (layer === 1) {
-            const mx = 780, my = 212;
-            hctx.save();
-            hctx.fillStyle = "#efe8d8";
-            hctx.fillRect(mx - 42, my, 84, 38);
-            hctx.fillStyle = "#d8ceba";
-            hctx.fillRect(mx - 42, my + 28, 84, 10);
-
-            const domes = [
-              { dx: -24, r: 13, h: 12 },
-              { dx: 0, r: 18, h: 16 },
-              { dx: 24, r: 13, h: 12 }
-            ];
-            domes.forEach(dm => {
-              const dGrad = hctx.createLinearGradient(mx + dm.dx - dm.r, my - dm.h, mx + dm.dx + dm.r, my);
-              dGrad.addColorStop(0, "#fffdf7");
-              dGrad.addColorStop(0.7, "#e6decb");
-              dGrad.addColorStop(1, "#b8ae9a");
-              hctx.fillStyle = dGrad;
-              hctx.beginPath();
-              hctx.arc(mx + dm.dx, my, dm.r, Math.PI, 0);
-              hctx.fill();
-              hctx.strokeStyle = "#d4a843";
-              hctx.lineWidth = 1.6;
-              hctx.beginPath();
-              hctx.moveTo(mx + dm.dx, my - dm.r);
-              hctx.lineTo(mx + dm.dx, my - dm.r - 7);
-              hctx.stroke();
-            });
-
-            [-46, 42].forEach(mlx => {
-              hctx.fillStyle = "#f5efe0";
-              hctx.fillRect(mx + mlx, my - 24, 6, 62);
-              hctx.fillStyle = "#d4a843";
-              hctx.beginPath();
-              hctx.arc(mx + mlx + 3, my - 24, 4, Math.PI, 0);
-              hctx.fill();
-            });
-
-            hctx.fillStyle = "#263b30";
-            [-22, 0, 22].forEach(dx => {
-              hctx.beginPath();
-              hctx.arc(mx + dx, my + 18, 5.5, Math.PI, 0);
-              hctx.lineTo(mx + dx + 5.5, my + 38);
-              hctx.lineTo(mx + dx - 5.5, my + 38);
-              hctx.fill();
-            });
-            hctx.restore();
-          }
 
           for (let i = 0; i < 42; i++) {
             const px = hRng() * WW;
@@ -6901,13 +6780,13 @@
 
         if (t >= 88.5) {
           const alpha = smoothstep(88.5, 91.5, t);
-          drawCinemaTitleCard(ctx, "সমাপ্ত", "A Tribute to Satyajit Ray & Studio Ghibli", alpha);
+          drawCinemaTitleCard(ctx, "সমাপ্ত", alpha);
         }
 
         ctx.restore();
       }
 
-      function drawCinemaTitleCard(ctx, bnText, subText, alpha) {
+      function drawCinemaTitleCard(ctx, bnText, alpha) {
         if (alpha <= 0.005) return;
         ctx.save();
         ctx.globalAlpha = alpha;
@@ -6915,8 +6794,8 @@
         ctx.textBaseline = "middle";
 
         const cx = CW * 0.5;
-        const cy = CH * 0.28;
-        const titleSize = 48;
+        const cy = CH * 0.48;
+        const titleSize = 54;
 
         ctx.shadowColor = "rgba(24, 14, 6, 0.78)";
         ctx.shadowBlur = 18;
@@ -6933,10 +6812,6 @@
         ctx.moveTo(cx - titleSize * 2.5, cy + titleSize * 0.65);
         ctx.quadraticCurveTo(cx, cy + titleSize * 0.78, cx + titleSize * 2.5, cy + titleSize * 0.62);
         ctx.stroke();
-
-        ctx.font = '400 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Georgia, serif';
-        ctx.fillStyle = "rgba(255, 238, 208, 0.92)";
-        ctx.fillText(subText, cx, cy + titleSize * 1.15);
 
         ctx.restore();
       }
@@ -6956,11 +6831,8 @@
       const volumeSlider = document.getElementById("volume-slider");
       const timelineSlider = document.getElementById("timeline-slider");
       const timeDisplay = document.getElementById("time-display");
-      const sceneLabel = document.getElementById("scene-label");
-      const statusDot = document.getElementById("status-dot");
       const fullscreenBtn = document.getElementById("fullscreen-btn");
       const viewport = document.getElementById("viewport");
-      const sceneButtons = Array.from(document.querySelectorAll(".scene-jump-btn"));
 
       const sound = new SoundEngine();
       const appState = {
@@ -6986,26 +6858,12 @@
         }
         timeDisplay.textContent = `${formatMMSS(appState.currentTime)} / 1:40`;
 
-        let currentScene = SCENES[0];
-        for (const sc of SCENES) {
-          if (appState.currentTime >= sc.start && appState.currentTime <= sc.end) {
-            currentScene = sc;
-            break;
-          }
-        }
-        sceneLabel.textContent = currentScene.title;
-        sceneButtons.forEach((btn, idx) => {
-          btn.classList.toggle("active", SCENES[idx].id === currentScene.id);
-        });
-
         if (appState.playing) {
           playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
           playLabel.textContent = "Pause";
-          statusDot.style.background = "#ffd996";
         } else {
           playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
           playLabel.textContent = "Play";
-          statusDot.style.background = "#e59866";
         }
       }
 
@@ -7134,18 +6992,6 @@
       });
       window.addEventListener("mouseup", () => { appState.isScrubbing = false; });
       window.addEventListener("touchend", () => { appState.isScrubbing = false; });
-
-      sceneButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const targetTime = parseFloat(btn.getAttribute("data-time") || "0");
-          sound.init();
-          startOverlay.classList.add("hidden");
-          appState.started = true;
-          appState.playing = true;
-          seekTo(targetTime);
-          sound.resume();
-        });
-      });
 
       fullscreenBtn.addEventListener("click", () => {
         const elem = document.getElementById("stage-wrapper");
